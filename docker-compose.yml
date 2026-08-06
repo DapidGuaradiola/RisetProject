@@ -4,7 +4,6 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     image: node:24-slim
-    container_name: frontend
     ports:
       - "3001:3001"
     environment:
@@ -19,7 +18,9 @@ services:
             - .next/
         - action: rebuild
           path: package.json
-  
+    depends_on:
+      - backend
+      
   backend:
     image: node:24-slim
     build:
@@ -27,18 +28,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    environment:
-      - WATCHPACK_POLLING=true
-    develop:
-      watch:
-        - action: sync
-          path: ./backend
-          target: /app
-          ignore:
-            - node_modules/
-            - .next/
-        - action: rebuild
-          path: package.json
     depends_on: [postgre]
 
   postgre:
