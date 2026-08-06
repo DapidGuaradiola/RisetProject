@@ -39,8 +39,8 @@ services:
             - .next/
         - action: rebuild
           path: package.json
-    depends_on: db
-    
+    depends_on: [postgre]
+
   postgre:
     image: postgres
     restart: always
@@ -81,6 +81,5 @@ services:
       CONFIG_STORAGE_TOPIC: my_connect_configs
       OFFSET_STORAGE_TOPIC: my_connect_offsets
       STATUS_STORAGE_TOPIC: my_connect_statuses
-    depends_on: 
-      -kafka
+    depends_on: [kafka]
       
