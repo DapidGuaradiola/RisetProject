@@ -1,0 +1,13 @@
+{
+  "name": "analytics-connector",  
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector", 
+    "database.hostname": "postgre", 
+    "database.port": "5432", 
+    "database.user": "postgres", 
+    "database.password": "Akudavid123", 
+    "database.dbname" : "risetproject", 
+    "topic.prefix": "analytics", 
+    "table.include.list": "public.comments,public.users,public.videos" 
+  }
+}
