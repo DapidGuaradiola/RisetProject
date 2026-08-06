@@ -28,6 +28,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    environment: 
+      DATABASE_URL: postgresql://postgres:Akudavid123@postgre:5432/risetproject
     depends_on: [postgre]
 
   postgre:
