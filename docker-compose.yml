@@ -3,8 +3,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    image: nextjs-sample:dev
-    container_name: nextjs-sample-dev
+    image: node:24-slim
+    container_name: frontend
     ports:
       - "3001:3001"
     environment:
@@ -21,10 +21,10 @@ services:
           path: package.json
   
   backend:
+    image: node:24-slim
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: nextjs-sample-dev
     ports:
       - "3000:3000"
     environment:
@@ -73,7 +73,6 @@ services:
   
   connect:
     image: quay.io/debezium/connect:3.6
-    BOOTSTRAP_SERVERS: kafka:9092
     ports: 
       - 8083:8083
     environment:
