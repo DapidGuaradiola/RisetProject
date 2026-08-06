@@ -18,8 +18,7 @@ services:
             - .next/
         - action: rebuild
           path: package.json
-    depends_on:
-      - backend
+    depends_on: [backend]
       
   backend:
     image: node:24-slim
@@ -30,7 +29,11 @@ services:
       - "3000:3000"
     environment: 
       DATABASE_URL: postgresql://postgres:Akudavid123@postgre:5432/risetproject
+      PORT: 3000
+      DEBUG : true
     depends_on: [postgre]
+    volumes:
+      - ./backend/src:usr/src/app/src
 
   postgre:
     image: postgres
@@ -49,6 +52,7 @@ services:
       POSTGRES_PASSWORD: Akudavid123
     ports:
       - 5432:5432
+  
   kafka: 
     image: quay.io/debezium/kafka:3.6
     hostname: kafka
