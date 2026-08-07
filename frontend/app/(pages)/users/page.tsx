@@ -4,7 +4,7 @@ export default async function Users(){
         username: string,
         nickname: string,
       };
-      const data = await fetch("http://localhost:3000/users");
+      const data = await fetch("http://backend:3000/users");
       const users: usersType[] = await data.json();
       return (
         <>

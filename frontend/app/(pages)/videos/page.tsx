@@ -3,7 +3,7 @@ export default async function videos() {
     video_id: number;
     title: string;
   };
-  const data = await fetch("http://localhost:3000/video");
+  const data = await fetch("http://backend:3000/video");
   const video: videoType[] = await data.json();
   return (
     <>
