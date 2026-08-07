@@ -33,7 +33,7 @@ async function createComment(formData: FormData) {
     create_time: new Date(),
   };
 
-  await fetch("http://localhost:3000/comments", {
+  await fetch("http://backend:3000/comments", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -197,7 +197,7 @@ function CommentItem({
 }
 
 export default async function Comments() {
-  const data = await fetch("http://localhost:3000/comments");
+  const data = await fetch("http://backend:3000/comments");
   const comments: CommentType[] = await data.json();
   const commentTree = buildCommentTree(comments);
   const activeUserId = activeUserIds[Math.floor(Math.random() * activeUserIds.length)];

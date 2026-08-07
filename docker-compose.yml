@@ -3,11 +3,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    image: node:24-slim
     ports:
       - "3001:3001"
     environment:
-      - WATCHPACK_POLLING=true
+      WATCHPACK_POLLING: "true"
+      PORT: 3001
     develop:
       watch:
         - action: sync
@@ -21,7 +21,6 @@ services:
     depends_on: [backend]
       
   backend:
-    image: node:24-slim
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -33,7 +32,17 @@ services:
       DEBUG : true
     depends_on: [postgre]
     volumes:
-      - ./backend/src:usr/src/app/src
+    - ./backend:/usr/src/app
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/src
+          target: /usr/src/app/src
+          ignore:
+            - node_modules/
+            - dist/
+        - action: rebuild
+          path: ./backend/package.json
 
   postgre:
     image: postgres
@@ -52,6 +61,9 @@ services:
       POSTGRES_PASSWORD: Akudavid123
     ports:
       - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/
+
   
   kafka: 
     image: quay.io/debezium/kafka:3.6
@@ -76,4 +88,6 @@ services:
       OFFSET_STORAGE_TOPIC: my_connect_offsets
       STATUS_STORAGE_TOPIC: my_connect_statuses
     depends_on: [kafka]
-      
+  
+volumes:
+  postgres_data:

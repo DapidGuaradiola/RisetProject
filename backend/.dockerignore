@@ -3,6 +3,5 @@ dist
 .git
 .gitignore
 Dockerfile
-test
 docker-compose.yml
 npm-debug.log*
