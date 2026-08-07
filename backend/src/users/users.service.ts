@@ -12,8 +12,7 @@ export class UsersService {
     async findAll() {
         try {
             return await this.db.transaction(async (tx) => {
-                return tx.query.users.findMany(
-                );
+                return tx.query.users.findMany();
             });
         } catch (e) {
             console.error(e);

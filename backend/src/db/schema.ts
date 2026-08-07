@@ -4,10 +4,15 @@ export const users = pgTable('users',{
     user_id : integer().primaryKey().generatedAlwaysAsIdentity(),
     username : varchar().unique(),
     nickname : varchar(),
+    followers_count: integer(),
 })
 export const videos = pgTable('videos',{
     video_id : integer().primaryKey().generatedAlwaysAsIdentity(),
     title : varchar().unique(),
+    description : text(),
+    yt_key: varchar(),
+    views_count : integer().default(0),
+    thumbnail:text(),
 })
 export const comments = pgTable('comments',{
     video_id :  integer().references(()=>videos.video_id),
