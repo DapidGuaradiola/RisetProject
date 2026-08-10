@@ -19,4 +19,9 @@ export class CommentsController {
   async create(@Body() dto:createCommentDTO){
     return this.commentsService.create(dto);
   }
+  @Get('/video/:videoId')
+  async findByVideoId(@Param('videoId') videoId:number){
+    return this.commentsService.getVideoComment(videoId);
+  }
+
 }
