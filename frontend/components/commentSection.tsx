@@ -3,7 +3,7 @@
 import { discoverValidationDepths } from "next/dist/server/app-render/instant-validation/instant-validation";
 import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
 import { FormEvent, useMemo, useState, useEffect } from "react";
-import FormReply from "./formReply";
+import FormComment from "./formReply";
 import Comment  from "./comment";
 
 type usersType = {
@@ -81,10 +81,6 @@ export default function CommentSection({ videoId, userId }: paramType) {
     }
   }, [comments]);
 
-  function handleAddComment(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault;
-  }
-
   return isLoading ? (
     <div className="animate-spin">
       <svg className="mr-3 size-5 animate-spin ..." viewBox="0 0 24 24"></svg>
@@ -100,16 +96,10 @@ export default function CommentSection({ videoId, userId }: paramType) {
       </div>
       <div className="py-6">
         {/* Add comment Handler */}
-        <form onSubmit={handleAddComment} className="w-full flex">
-          <input
-            type="text"
-            className="w-full h-10 text-xl mr-2 pl-2 border border-gray-800 rounded"
-            placeholder="Write Your Comment"
-          />
-          <button type="submit" className="cursor-pointer">
-            Comment
-          </button>
-        </form>
+        <FormComment isRoot = {true}
+              parent={undefined}
+              replyVideoId={videoId}
+              replyUserId={userId}/>
 
         {/*All Comments */}
         <div className="w-full ">

@@ -1,4 +1,4 @@
-import FormReply from "./formReply";
+import FormComment from "./formReply";
 import Replies from "./replies";
 type CommentItem = {
   comment_id: number;
@@ -54,7 +54,7 @@ export default function Comment({
           <p className="line-clamp-2 truncate">{data.comment}</p>
           {/* action button */}
           <div className="flex gap-5">
-            <FormReply
+            <FormComment
               parent={data.comment_id}
               parentLevel={data.level}
               replyVideoId={videoId}
