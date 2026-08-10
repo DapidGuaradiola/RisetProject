@@ -20,7 +20,7 @@ export default function UserGrid({width, sessionUser, setSessionUser}:paramType)
 
   useEffect(() => {
     const loadUsers = async () => {
-      const res = await fetch("http://localhost:3000/users");
+      const res = await fetch("http://backend:3000/users");
       const data: usersType[] = await res.json();
       console.log(data)
       setUsers(data);

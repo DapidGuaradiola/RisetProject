@@ -40,7 +40,7 @@ export default function CommentSection({ videoId, userId }: paramType) {
     setIsLoading(true);
     const fetchData = async () => {
       const res = await fetch(
-        `http://localhost:3000/comments/video/${videoId}`,
+        `http://backend:3000/comments/video/${videoId}`,
       );
       const data: CommentItem[] = await res.json();
       setComments(data);

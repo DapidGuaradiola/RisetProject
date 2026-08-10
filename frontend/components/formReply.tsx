@@ -17,7 +17,7 @@ export default function FormComment({
   const [comment, setComment] = useState("");
   let handleReply = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const res = await fetch("http://localhost:3000/comments/", {
+    const res = await fetch("http://backend:3000/comments/", {
       method: "POST",
       headers: { "Content-Type": "Application/json" },
       body: JSON.stringify({

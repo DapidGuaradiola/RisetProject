@@ -9,7 +9,7 @@ export default async function VideoGrid() {
     thumbnail: string,
     views_count: number,
   };
-  const res = await fetch("http://localhost:3000/video");
+  const res = await fetch("http://backend:3000/video");
   const videos: videoType[] = await res.json();
   return (
     <section className="w-full lg:w-full">
