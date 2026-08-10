@@ -12,7 +12,7 @@ export default async function VideoGrid() {
   const res = await fetch("http://localhost:3000/video");
   const videos: videoType[] = await res.json();
   return (
-    <section className="w-full lg:w-[70%]">
+    <section className="w-full lg:w-full">
       <div className="grid gap-6 max-h-screen overflow-scroll scrollbar-none">
         {videos.map((v) => {
           return (
@@ -22,7 +22,7 @@ export default async function VideoGrid() {
               key={v.video_id}
             >
               <div className="aspect-video w-[full] my-auto rounded-3xl overflow-hidden">
-                <img src={v.thumbnail} alt={v.title} />
+                <img src={v.thumbnail} alt={v.title} className="w-full"/>
                 </div>
               <div className="space-y-3 p-5">
                 <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 group-hover:text-amber-700">

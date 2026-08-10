@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { DRIZZLE } from 'src/db/db.module';
 import type { DrizzleDB } from 'src/db/drizzle';
-import type { createCommentDTO  } from './comment.dto'; 
+import type { createCommentDTO } from './comment.dto';
 import { comments } from 'src/db/schema';
 @Injectable()
 export class CommentsService {
@@ -18,8 +18,8 @@ export class CommentsService {
             console.error(e);
         }
     }
-    
-    async findById(id:number) {
+
+    async findById(id: number) {
         try {
             return await this.db.transaction(async (tx) => {
                 return tx.query.comments.findFirst({
@@ -33,18 +33,31 @@ export class CommentsService {
         }
     }
 
-    async create(commentData:createCommentDTO){
+    async create(commentData: createCommentDTO) {
         try {
-            const parentExist = await this.findById(commentData.parent_comment_id);
-            if(!parentExist){
-            return console.log("data parent not found");    
-            }
             const inserted = await this.db.transaction(async (tx) => {
                 return tx.insert(comments).values(commentData);
             });
-            console.log(inserted);  
+            console.log(inserted);
         } catch (e) {
             console.error(e);
         }
     }
+    async getVideoComment(id: number) {
+        try {
+            return await this.db.transaction(async (tx) => {
+                return tx.query.comments.findMany({
+                    where: {
+                        video_id: { eq: id }
+                    },
+                    with: {
+                        user: true
+                    }
+                });
+            });
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
 }

@@ -12,7 +12,6 @@ export default function Home() {
         <div className="flex flex-col gap-8 lg:flex-row">
           <Suspense fallback={<div className="h-80 rounded-3xl bg-white" />}>
             <VideoGrid />
-            <UserGrid />
           </Suspense>
         </div>
       </div>

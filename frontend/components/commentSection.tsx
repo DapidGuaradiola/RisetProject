@@ -1,183 +1,234 @@
-'use client';
+"use client";
 
-import { FormEvent, useMemo, useState } from 'react';
+import { discoverValidationDepths } from "next/dist/server/app-render/instant-validation/instant-validation";
+import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
+import { FormEvent, useMemo, useState, useEffect } from "react";
 
-type CommentItem = {
-	id: number;
-	author: string;
-	text: string;
-	postedAt: string;
-	level: number;
-	parent: number | null;
+type usersType = {
+  user_id: number;
+  username: string;
+  nickname: string;
+  followers_count: number;
 };
 
-const dummyComments: CommentItem[] = [
-	{
-		id: 1,
-		author: 'Nadia',
-		text: 'Great breakdown. The pacing is really easy to follow.',
-		postedAt: '2 hours ago',
-		level: 0,
-		parent: null,
-	},
-	{
-		id: 2,
-		author: 'Rafi',
-		text: 'Can you make a part 2 with deeper examples?',
-		postedAt: '1 hour ago',
-		level: 0,
-		parent: null,
-	},
-	{
-		id: 3,
-		author: 'Sinta',
-		text: 'Same here, I would watch that.',
-		postedAt: '58 minutes ago',
-		level: 1,
-		parent: 2,
-	},
-	{
-		id: 4,
-		author: 'Bimo',
-		text: 'Timestamp 03:24 was the key part for me.',
-		postedAt: '36 minutes ago',
-		level: 0,
-		parent: null,
-	},
-	{
-		id: 5,
-		author: 'Alya',
-		text: 'Nice summary, thank you.',
-		postedAt: '25 minutes ago',
-		level: 1,
-		parent: 1,
-	},
-];
+type paramType = {
+  userId: number;
+  videoId: number;
+};
+
+type CommentItem = {
+  comment_id: number;
+  video_id: number;
+  user_id: number;
+  comment: string;
+  parent_comment_id: number;
+  level: number;
+  create_time: Timestamp;
+  user: usersType;
+};
 
 function getInitial(author: string) {
-	return author.trim().charAt(0).toUpperCase() || '?';
+  return author.trim().charAt(0).toUpperCase() || "?";
 }
 
-export default function CommentSection() {
-	const [comments, setComments] = useState<CommentItem[]>(dummyComments);
-	const [draft, setDraft] = useState('');
+export default function CommentSection({ videoId, userId }: paramType) {
+  const [comments, setComments] = useState<CommentItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  useEffect(() => {
+    setIsLoading(true);
+    const fetchData = async () => {
+      const res = await fetch(
+        `http://localhost:3000/comments/video/${videoId}`,
+      );
+      const data: CommentItem[] = await res.json();
+      setComments(data);
+      console.log(data);
+      if (data) {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-	const { topLevel, repliesByParent } = useMemo(() => {
-		const validParentIds = new Set(comments.map((comment) => comment.id));
+  const { topLevel, repliesByParent } = useMemo(() => {
+    if (comments) {
+      const validParentIds = new Set(
+        comments.map((comment) => comment.comment_id),
+      );
+      const groupedReplies: Record<number, CommentItem[]> = {};
+      const roots: CommentItem[] = [];
 
-		const groupedReplies: Record<number, CommentItem[]> = {};
-		const roots: CommentItem[] = [];
+      for (const comment of comments) {
+        const isReply =
+          comment.level === 1 &&
+          comment.parent_comment_id !== null &&
+          validParentIds.has(comment.parent_comment_id);
 
-		for (const comment of comments) {
-			const isReply =
-				comment.level === 1 &&
-				comment.parent !== null &&
-				validParentIds.has(comment.parent);
+        if (isReply) {
+          const parentId = comment.parent_comment_id as number;
+          if (!groupedReplies[parentId]) {
+            groupedReplies[parentId] = [];
+          }
+          groupedReplies[parentId].push(comment);
+        } else {
+          roots.push(comment);
+        }
+      }
+      return { topLevel: roots, repliesByParent: groupedReplies };
+    } else {
+      return { topLevel: [], repliesByParent: [] };
+    }
+  }, [comments]);
 
-			if (isReply) {
-				const parentId = comment.parent as number;
-				if (!groupedReplies[parentId]) {
-					groupedReplies[parentId] = [];
-				}
-				groupedReplies[parentId].push(comment);
-			} else {
-				roots.push(comment);
-			}
-		}
+  function handleAddComment(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault;
+  }
 
-		return { topLevel: roots, repliesByParent: groupedReplies };
-	}, [comments]);
+  function FormReply({
+    parent,
+    parentLevel,
+  }: {
+    parent: number;
+    parentLevel: number;
+  }) {
+    const [reply, setReply] = useState(false);
+    const [comment, setComment] = useState(" ");
+    let handleReply = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const res = await fetch("http://localhost:3000/comments/", {
+        method: "POST",
+        headers: { "Content-Type": "Application/json" },
+        body: JSON.stringify({
+          video_id: videoId,
+          parent_comment_id: parent,
+          level: parentLevel + 1,
+          comment: comment,
+          user_id: userId,
+        }),
+      });
+      if(res.ok){
+        setComment("");
+      }
+    };
+    let handleButtonReply = () => {
+      setReply(!reply);
+    };
+    return (
+      <>
+        <button
+          onClick={handleButtonReply}
+          className="cursor-pointer text-blue-400"
+        >
+          reply
+        </button>
+        <form
+          onSubmit={(e) => handleReply(e)}
+          className="w-full flex"
+          hidden={!reply}
+        >
+          <input
+            name="comment"
+            type="text"
+            value={comment}
+            onChange={(e)=>setComment(e.target.value)}
+            className="w-full h-10 text-xl pl-2 mr-2 border border-gray-800 rounded"
+            placeholder="Write your reply"
+          />
+          <button type="submit" className="cursor-pointer">
+            Reply
+          </button>
+        </form>
+      </>
+    );
+  }
 
-	function handleAddComment(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		const text = draft.trim();
-		if (!text) {
-			return;
-		}
+  return isLoading ? (
+    <div className="animate-spin">
+      <svg className="mr-3 size-5 animate-spin ..." viewBox="0 0 24 24"></svg>
+      Loading Comment Data...
+    </div>
+  ) : (
+    <section>
+      {/* Comment Header  */}
+      <div className="w-full mt-2.5 border-b border-gray-500 rounded-t-xl">
+        <h2 className="p-6 font-semibold text-2xl">
+          {comments.length} Comments
+        </h2>
+      </div>
+      <div className="py-6">
+        {/* Add comment Handler */}
+        <form onSubmit={handleAddComment} className="w-full flex">
+          <input
+            type="text"
+            className="w-full h-10 text-xl mr-2 pl-2 border border-gray-800 rounded"
+            placeholder="Write Your Comment"
+          />
+          <button type="submit" className="cursor-pointer">
+            Comment
+          </button>
+        </form>
 
-		const nextId = comments.length ? Math.max(...comments.map((item) => item.id)) + 1 : 1;
-		const newComment: CommentItem = {
-			id: nextId,
-			author: 'You',
-			text,
-			postedAt: 'just now',
-			level: 0,
-			parent: null,
-		};
-
-		setComments((prev) => [newComment, ...prev]);
-		setDraft('');
-	}
-
-	return (
-		<section className="mt-10 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-5 sm:p-6">
-			<h2 className="text-xl font-semibold tracking-tight text-white">
-				{topLevel.length} Comments
-			</h2>
-
-			<form onSubmit={handleAddComment} className="mt-4 flex items-start gap-3">
-				<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-700 text-sm font-semibold text-white">
-					Y
-				</div>
-				<div className="w-full">
-					<input
-						value={draft}
-						onChange={(event) => setDraft(event.target.value)}
-						placeholder="Add a comment..."
-						className="w-full border-0 border-b border-zinc-600 bg-transparent px-0 pb-2 pt-1 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-zinc-300"
-					/>
-					<div className="mt-3 flex justify-end">
-						<button
-							type="submit"
-							className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-white"
-						>
-							Comment
-						</button>
-					</div>
-				</div>
-			</form>
-
-			<div className="mt-6 space-y-6">
-				{topLevel.map((comment) => {
-					const replies = repliesByParent[comment.id] ?? [];
-
-					return (
-						<article key={comment.id} className="space-y-3">
-							<div className="flex items-start gap-3">
-								<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-600/80 text-sm font-semibold text-white">
-									{getInitial(comment.author)}
-								</div>
-								<div className="min-w-0">
-									<p className="text-sm font-medium text-zinc-100">
-										{comment.author}{' '}
-										<span className="font-normal text-zinc-400">{comment.postedAt}</span>
-									</p>
-									<p className="mt-1 text-sm leading-6 text-zinc-200">{comment.text}</p>
-								</div>
-							</div>
-
-							{replies.length > 0 && (
-								<div className="ml-12 space-y-3 border-l border-zinc-700 pl-4">
-									{replies.map((reply) => (
-										<div key={reply.id} className="flex items-start gap-3">
-											<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-700 text-xs font-semibold text-zinc-100">
-												{getInitial(reply.author)}
-											</div>
-											<div>
-												<p className="text-sm font-medium text-zinc-100">
-													{reply.author}{' '}
-													<span className="font-normal text-zinc-400">{reply.postedAt}</span>
-												</p>
-												<p className="mt-1 text-sm leading-6 text-zinc-200">{reply.text}</p>
-											</div>
-										</div>
-									))}
-								</div>
-							)}
-						</article>
-					);
-				})}
-			</div>
-		</section>
-	);
+        {/*All Comments */}
+        <div className="w-full">
+          {comments.length === 0 ? (
+            <p className="text-2xl font-bold">No Comment Here</p>
+          ) : (
+            topLevel.map((root) => (
+              <article
+                key={root.comment_id}
+                className="w-full h-25 flex items-start gap-5 bg-red mt-4"
+              >
+                <div className="shrink-0">
+                  <img
+                    src="https://picsum.photos/600/600"
+                    alt={root.user.username}
+                    className="h-16 w-16 rounded-full object-cover"
+                  />
+                </div>
+                <div>
+                  <div className="flex-1 min-w-0 ">
+                    <span className="text-sm text-zinc-500">
+                      @{root.user.nickname}
+                    </span>
+                  </div>
+                  <p className="line-clamp-2 truncate">{root.comment}</p>
+                  <FormReply
+                    parent={root.comment_id}
+                    parentLevel={root.level}
+                  />
+                </div>
+              </article>
+            ))
+          )}
+        </div>
+      </div>
+    </section>
+  );
 }
+
+//   {/* Replies */}
+//   {repliesByParent[root.comment_id] ? (
+//     repliesByParent[root.comment_id].map((replies) => (
+//       <article>
+//         <div className="">
+//           <img
+//             src="https://picsum.photos/600/600"
+//             alt={replies.user.username}
+//             className="h-16 w-16 rounded-full object-cover"
+//           />
+//         </div>
+//         <div>
+//           <div className="flex-1 min-w-0 ">
+//             <span className="text-sm text-zinc-500">
+//               @{replies.user.nickname}
+//             </span>
+//           </div>
+//           <p className="line-clamp-2 truncate">
+//             {replies.comment}
+//           </p>
+//         </div>
+//       </article>
+//     ))
+//   ) : (
+//     <div>no replies</div>
+//   )}
