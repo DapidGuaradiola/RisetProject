@@ -3,6 +3,8 @@
 import { discoverValidationDepths } from "next/dist/server/app-render/instant-validation/instant-validation";
 import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
 import { FormEvent, useMemo, useState, useEffect } from "react";
+import FormReply from "./formReply";
+import Comment  from "./comment";
 
 type usersType = {
   user_id: number;
@@ -60,7 +62,6 @@ export default function CommentSection({ videoId, userId }: paramType) {
 
       for (const comment of comments) {
         const isReply =
-          comment.level === 1 &&
           comment.parent_comment_id !== null &&
           validParentIds.has(comment.parent_comment_id);
 
@@ -82,64 +83,6 @@ export default function CommentSection({ videoId, userId }: paramType) {
 
   function handleAddComment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault;
-  }
-
-  function FormReply({
-    parent,
-    parentLevel,
-  }: {
-    parent: number;
-    parentLevel: number;
-  }) {
-    const [reply, setReply] = useState(false);
-    const [comment, setComment] = useState(" ");
-    let handleReply = async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      const res = await fetch("http://localhost:3000/comments/", {
-        method: "POST",
-        headers: { "Content-Type": "Application/json" },
-        body: JSON.stringify({
-          video_id: videoId,
-          parent_comment_id: parent,
-          level: parentLevel + 1,
-          comment: comment,
-          user_id: userId,
-        }),
-      });
-      if(res.ok){
-        setComment("");
-      }
-    };
-    let handleButtonReply = () => {
-      setReply(!reply);
-    };
-    return (
-      <>
-        <button
-          onClick={handleButtonReply}
-          className="cursor-pointer text-blue-400"
-        >
-          reply
-        </button>
-        <form
-          onSubmit={(e) => handleReply(e)}
-          className="w-full flex"
-          hidden={!reply}
-        >
-          <input
-            name="comment"
-            type="text"
-            value={comment}
-            onChange={(e)=>setComment(e.target.value)}
-            className="w-full h-10 text-xl pl-2 mr-2 border border-gray-800 rounded"
-            placeholder="Write your reply"
-          />
-          <button type="submit" className="cursor-pointer">
-            Reply
-          </button>
-        </form>
-      </>
-    );
   }
 
   return isLoading ? (
@@ -169,35 +112,12 @@ export default function CommentSection({ videoId, userId }: paramType) {
         </form>
 
         {/*All Comments */}
-        <div className="w-full">
+        <div className="w-full ">
           {comments.length === 0 ? (
             <p className="text-2xl font-bold">No Comment Here</p>
           ) : (
             topLevel.map((root) => (
-              <article
-                key={root.comment_id}
-                className="w-full h-25 flex items-start gap-5 bg-red mt-4"
-              >
-                <div className="shrink-0">
-                  <img
-                    src="https://picsum.photos/600/600"
-                    alt={root.user.username}
-                    className="h-16 w-16 rounded-full object-cover"
-                  />
-                </div>
-                <div>
-                  <div className="flex-1 min-w-0 ">
-                    <span className="text-sm text-zinc-500">
-                      @{root.user.nickname}
-                    </span>
-                  </div>
-                  <p className="line-clamp-2 truncate">{root.comment}</p>
-                  <FormReply
-                    parent={root.comment_id}
-                    parentLevel={root.level}
-                  />
-                </div>
-              </article>
+              <Comment key={root.comment_id} data={root} allReplies={repliesByParent} dataReplies={repliesByParent[root.comment_id]} videoId={videoId} userId={userId}/>
             ))
           )}
         </div>
