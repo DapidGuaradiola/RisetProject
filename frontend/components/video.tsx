@@ -163,6 +163,7 @@ export default function VideoGrid() {
         );
 
         if (videoId !== activeIndex) {
+          console.log("switching to", videoId, "from", activeIndex);
           setActiveIndex(videoId);
         }
       },
@@ -227,7 +228,7 @@ export default function VideoGrid() {
 
     const scrollTop =
       elementCenter - containerCenter;
-      
+
     if (
       Math.abs(container.scrollTop - scrollTop) < 5
     ) {
