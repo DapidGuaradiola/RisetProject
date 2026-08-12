@@ -3,7 +3,7 @@ import { AnalyticsService } from './analytics.service';
 import { AnalyticsController } from './analytics.controller';
 import { ClickHouseClient, createClient } from '@clickhouse/client';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-export const CLICKHOUSE = Symbol('CLICKHOUSE_CONNECTION');
+import {CLICKHOUSE} from './clickhouse.constants';
 @Global()
 @Module({
   imports: [ConfigModule],

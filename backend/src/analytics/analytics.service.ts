@@ -1,6 +1,7 @@
 import { Injectable,Inject } from '@nestjs/common';
 import { ClickHouseClient } from '@clickhouse/client';
-import { CLICKHOUSE } from './analytics.module';
+import {CLICKHOUSE} from './clickhouse.constants';
+
 @Injectable()
 export class AnalyticsService {
     constructor(
@@ -11,8 +12,11 @@ export class AnalyticsService {
             query : 'SELECT * FROM comments_storage',
             format: 'JSONEachRow'
         })
-        const result = res.json();
-        console.log(`[data from storage] ${result}`);
-        return result;
+        const summary = res.response_headers?.['x-clickhouse-summary'];
+        const parsedSummary = summary ? JSON.parse(summary as string) : null;
+        const duration = parsedSummary ? Number(parsedSummary.elapsed_ns)/1e6 : null;
+        const result = await res.json();
+        console.log(`Each Queries Separator  ::::: [Duration] ${duration} ms`);
+        return {result,duration};
     }
 }

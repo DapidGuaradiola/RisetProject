@@ -1,15 +1,17 @@
-import { Controller,Sse, Inject } from '@nestjs/common';
+import { Controller, Sse, Inject } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
-import {CLICKHOUSE} from './analytics.module';
-
+import { Observable, switchMap, interval, map } from 'rxjs';
+import type { CommentsMessage } from './types/comment ';
 @Controller('analytics')
 export class AnalyticsController {
   constructor(
-    @Inject(CLICKHOUSE)
-    private readonly analyticsService: AnalyticsService) {   
+    private readonly analyticsService: AnalyticsService) {
   }
   @Sse('/comments')
-    async streamComments(){
-      return await this.analyticsService.streamComments();
-    }
+  streamComments(): Observable<CommentsMessage> {
+    console.log(process.env.CLICKHOUSE_URL);
+    return interval(1000).pipe(
+      switchMap(() => this.analyticsService.streamComments()),
+      map(({ result, duration }) => ({ data: result, duration }) as CommentsMessage));
+  }
 }
