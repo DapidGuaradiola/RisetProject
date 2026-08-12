@@ -8,7 +8,6 @@ export default function Home() {
         <div className="mb-10 rounded-full border border-zinc-200 bg-white/80 px-6 py-3 text-sm text-zinc-500 shadow-sm backdrop-blur">
           Video and user examples for later recursive backend fetching
         </div>
-
         <div className="flex flex-col gap-8 lg:flex-row">
           <Suspense fallback={<div className="h-80 rounded-3xl bg-white" />}>
             <VideoGrid />
