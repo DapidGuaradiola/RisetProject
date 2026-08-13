@@ -254,7 +254,7 @@ export default function VideoGrid() {
             className="relative mx-auto h-125 overflow-hidden rounded-3xl"
           >
             <img
-              src={video.thumbnail}
+              src="https://picsum.photos/800/600?random=1"
               alt={video.title}
               loading="lazy"
               className="mx-auto my-auto aspect-[19/16] h-full"

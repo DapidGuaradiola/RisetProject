@@ -9,6 +9,8 @@ type ContentContextType = {
   setActiveComment: (state: boolean) => void,
   isLoading: boolean,
   setIsLoading: (state: boolean) => void,
+  addComment: string,
+  setAddComment: (value: string) => void,
   // commentList: CommentType[],
   // setCommentList: (item:CommentType[]) => void
 }
@@ -18,9 +20,10 @@ export default function ContentClients({ children }: { children: ReactNode }) {
   const [activeIndex, setActiveIndex] = useState(-1);
   const [activeComment, setActiveComment] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [addComment, setAddComment] = useState("");
   // const [commentList, setCommentList];
   return (
-    <ContentContext.Provider value={{ activeIndex, setActiveIndex, activeComment, setActiveComment, isLoading, setIsLoading }}>
+    <ContentContext.Provider value={{ activeIndex, setActiveIndex, activeComment, setActiveComment, isLoading, setIsLoading, addComment, setAddComment }}>
       {children}
     </ContentContext.Provider>
   );

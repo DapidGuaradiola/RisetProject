@@ -36,7 +36,7 @@ function getInitial(author: string) {
 export default function CommentSection({userId }: paramType) {
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const {activeComment, activeIndex} = useContentContext();
+  const {activeComment,addComment, activeIndex} = useContentContext();
   useEffect(() => {
     setIsLoading(true);
     const fetchData = async () => {
@@ -51,7 +51,7 @@ export default function CommentSection({userId }: paramType) {
       }
     };
     fetchData();
-  }, [activeIndex]);
+  }, [activeIndex,addComment]);
 
   const { topLevel, repliesByParent } = useMemo(() => {
     if (comments) {
