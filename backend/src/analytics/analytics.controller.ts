@@ -1,4 +1,4 @@
-import { Controller, Query } from '@nestjs/common';
+import { Controller, Query, MessageEvent } from '@nestjs/common';
 import { Sse } from '@nestjs/common';
 import { Observable, interval } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
@@ -33,13 +33,15 @@ export class AnalyticsController {
 
   @Sse('/comments/by-minute')
   streamCommentsByMinute(
-    @Query('limit') limit?: string,
-    @Query('days') days?: string,): Observable<AnalyticsMessage<any>> {
+    @Query('hours') hours?: string,): Observable<MessageEvent> {
     return interval(1000).pipe(
       switchMap(() =>
-        this.analyticsService.commentsByMinute(limit),
+        this.analyticsService.commentsByMinute(
+          hours ? Number(hours) : undefined),
       ),
-      map(({ result, duration }) => ({ data: result, duration }) as AnalyticsMessage<any>),
+      map(({ result, duration }) => ({
+        data: { data: result, duration } as AnalyticsMessage<any>,
+      })),
     );
   }
 

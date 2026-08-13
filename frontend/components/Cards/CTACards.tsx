@@ -4,15 +4,15 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 export default function CTACard() {
     const { isLoading, currentTimeLine } = useCTAContext();
     return (<div className="card">
-        {/* <div className="card-header">
-                <h2>Comments Added per Minute</h2>
-                {durations != null && (
-                    <span className="duration">{durations.commentsByMinute.toFixed(1)} ms</span>
-                )}
-            </div> */}
+        <div className="card-header">
+            <h2>Comments Added per Minute</h2>
+            {currentTimeLine.duration != null && (
+                <span className="duration">{currentTimeLine.duration.toFixed(1)} ms</span>
+            )}
+        </div>
         {!isLoading && (
             <ResponsiveContainer width="100%" height={320}>
-                <LineChart data={currentTimeLine}>
+                <LineChart data={currentTimeLine.data}>
                     <XAxis
                         dataKey="minute"
                         tickFormatter={(v) => new Date(v.replace(' ', 'T')).toLocaleTimeString()}

@@ -56,16 +56,17 @@ export class AnalyticsService {
   }
 
   /** Comment volume bucketed by minute */
-  async commentsByMinute(limit) {
+  async commentsByMinute(hours = 24) {
     const query = `
       SELECT
         toStartOfMinute(create_time) AS minute,
         count() AS comment_count
       FROM comments_storage
+      WHERE create_time >= now() - INTERVAL {hours:UInt32} HOUR
       GROUP BY minute
       ORDER BY minute ASC
     `;
-    return this.run<{ minute: string; comment_count: number }>(query,{limit});
+    return this.run<{ minute: string; comment_count: number }>(query, { hours });
   }
 
   /** Users with the most replies (comments where parent_comment_id is not null) */

@@ -1,10 +1,10 @@
 "use client";
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { useAnalytics } from '../Clients/AnalyticClient';
+import { useAnalytics,} from '../Clients/AnalyticClient';
 
 export function CommentsTimelineCard() {
-  const { commentsByMinute, loading, error} = useAnalytics();
+  const { commentsByMinute, loading, error,durations} = useAnalytics();
   return (
     <div className="card">
       <div className="card-header">

@@ -16,7 +16,7 @@ const initialState: AnalyticsState = {
     loading: { topVideos: true, commentsByMinute: true, topRepliers: true },
     error: { topVideos: null, commentsByMinute: null, topRepliers: null },
     durations: { topVideos: null, commentsByMinute: null, topRepliers: null },
-    filters: { days: 30, hours: 24, limit: 20 },
+    filters: { days: 1, hours: 1, limit: 20 },
 };
 
 export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
@@ -67,7 +67,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
 
         const cleanup = subscribeToStream<CommentsByMinute>(
             '/by-minute',
-            { limit: state.filters.limit, days: state.filters.days },
+            { limit: state.filters.hours },
             (msg) => {
                 setState((prev) => ({
                     ...prev,
@@ -86,7 +86,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
         );
 
         return cleanup;
-    }, [state.filters.limit]);
+    }, [state.filters.hours]);
 
     // Top repliers stream
     useEffect(() => {

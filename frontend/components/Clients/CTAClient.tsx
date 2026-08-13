@@ -1,28 +1,34 @@
 "use Client";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-
-type dataType = {
+type messageType = {
     minute: string,
     comment_count: number,
 }
 
+type dataType = {
+    data: messageType[],
+    duration: number
+}
+
 type contextType = {
-    currentTimeLine: dataType[],
-    setCurrentTimeLine: (timeline: dataType[]) => void,
+    currentTimeLine: dataType,
+    setCurrentTimeLine: (timeline: dataType) => void,
     isLoading: boolean,
     setIsLoading: (state: boolean) => void,
 }
 
 const CommentTimelineContext = createContext<contextType | undefined>(undefined);
 export function CTAClients({ children }: { children: ReactNode }) {
-    const [currentTimeLine, setCurrentTimeLine] = useState<dataType[]>([]);
+    const [currentTimeLine, setCurrentTimeLine] = useState<dataType>(
+        { data: [], duration: 0 }
+    );
     const [isLoading, setIsLoading] = useState(false);
     useEffect(() => {
-        const eventSource = new EventSource('http://localhost:3000/analytics/comments/by-minute?limit=20');
+        const eventSource = new EventSource('http://localhost:3000/analytics/comments/by-minute?limit');
 
         eventSource.onmessage = (event) => {
-            const extracted: dataType[] = JSON.parse(event.data)
-            console.log('[Extracted]', extracted);
+            const extracted: dataType = JSON.parse(event.data)
+            console.log('Extracted', extracted);
             setCurrentTimeLine(extracted);
         }
         eventSource.onerror = (err) => {
@@ -35,7 +41,7 @@ export function CTAClients({ children }: { children: ReactNode }) {
             eventSource.close();
         };
     }, []);
-    return (<CommentTimelineContext.Provider value={{ currentTimeLine, setCurrentTimeLine, isLoading, setIsLoading}}>
+    return (<CommentTimelineContext.Provider value={{ currentTimeLine, setCurrentTimeLine, isLoading, setIsLoading }}>
         {children}
     </CommentTimelineContext.Provider>)
 }
