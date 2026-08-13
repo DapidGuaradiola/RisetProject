@@ -12,10 +12,10 @@ export default function AnalyticsPage() {
       <div className="analytics-page">
         <h1>Comment Analytics</h1>
         <FiltersBar />
-        <div className="grid">
-          {/* <TopVideosCard /> */}
+        <div className="grid grid-row">
+          <TopVideosCard />
           <CommentsTimelineCard />
-          {/* <TopRepliersCard /> */}
+          <TopRepliersCard />
         </div>
       </div>
     </AnalyticsProvider>

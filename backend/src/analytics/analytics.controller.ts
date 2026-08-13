@@ -19,7 +19,7 @@ export class AnalyticsController {
   streamTopVideos(
     @Query('limit') limit?: string,
     @Query('days') days?: string,
-  ): Observable<AnalyticsMessage<any>> {
+  ): Observable<MessageEvent> {
     return interval(1000).pipe(
       switchMap(() =>
         this.analyticsService.topVideosByComments(
@@ -27,7 +27,7 @@ export class AnalyticsController {
           days ? Number(days) : undefined,
         ),
       ),
-      map(({ result, duration }) => ({ data: result, duration }) as AnalyticsMessage<any>),
+      map(({ result, duration }) => ({ data: { data: result, duration } as AnalyticsMessage<any> })),
     );
   }
 
@@ -49,7 +49,7 @@ export class AnalyticsController {
   streamTopRepliers(
     @Query('limit') limit?: string,
     @Query('days') days?: string,
-  ): Observable<AnalyticsMessage<any>> {
+  ): Observable<MessageEvent> {
     return interval(1000).pipe(
       switchMap(() =>
         this.analyticsService.topUsersByReplies(
@@ -57,7 +57,9 @@ export class AnalyticsController {
           days ? Number(days) : undefined,
         ),
       ),
-      map(({ result, duration }) => ({ data: result, duration }) as AnalyticsMessage<any>),
+      map(({ result, duration }) => ({
+        data: { data: result, duration } as AnalyticsMessage<any>,
+      })),
     );
   }
 }

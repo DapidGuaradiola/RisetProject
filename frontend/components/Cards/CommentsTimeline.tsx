@@ -27,7 +27,7 @@ export function CommentsTimelineCard() {
             />
             <YAxis allowDecimals={false} />
             <Tooltip labelFormatter={(v) => new Date((v as string).replace(' ', 'T')).toLocaleTimeString()} />
-            <Line type="monotone" dataKey="comment_count" stroke="#16a34a" dot={false} />
+            <Line type="monotone" dataKey="comment_count" stroke="#1ff8ff" dot={false} />
           </LineChart>
         </ResponsiveContainer>
       )}

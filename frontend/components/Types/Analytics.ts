@@ -9,7 +9,8 @@ export interface CommentsByMinute {
 }
 
 export interface TopReplier {
-  user_id: string;
+  top_comment_id: number;
+  topic: string;
   reply_count: number;
 }
 

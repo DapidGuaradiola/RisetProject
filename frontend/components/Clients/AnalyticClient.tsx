@@ -16,7 +16,7 @@ const initialState: AnalyticsState = {
     loading: { topVideos: true, commentsByMinute: true, topRepliers: true },
     error: { topVideos: null, commentsByMinute: null, topRepliers: null },
     durations: { topVideos: null, commentsByMinute: null, topRepliers: null },
-    filters: { days: 1, hours: 1, limit: 20 },
+    filters: { days: 1, hours: 1, limit: 5 },
 };
 
 export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
