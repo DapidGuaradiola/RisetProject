@@ -4,8 +4,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { useAnalytics } from '../Clients/AnalyticClient';
 
 export function CommentsTimelineCard() {
-  const { commentsByMinute, loading, error, durations } = useAnalytics();
-
+  const { commentsByMinute, loading, error} = useAnalytics();
   return (
     <div className="card">
       <div className="card-header">

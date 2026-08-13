@@ -86,7 +86,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
         );
 
         return cleanup;
-    }, [state.filters.hours]);
+    }, [state.filters.limit]);
 
     // Top repliers stream
     useEffect(() => {

@@ -32,7 +32,7 @@ export default function ContentClients({ children }: { children: ReactNode }) {
 export function useContentContext() {
   const context = useContext(ContentContext);
   if (!context) {
-    throw new Error("useTheme must be used within a ThemeProvider");
+    throw new Error("Use this context must be used within a ContentContext");
   }
   return context;
 }
