@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:3000/analytics/comments';
+const BASE_URL = 'http://localhost:3000/analytics/';
 
 export interface SseMessage<T> {
   data: T[];

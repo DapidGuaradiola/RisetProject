@@ -16,6 +16,12 @@ async function bootstrap() {
     // Generate COMMENT//
     //                //
 
+    type UserType = {
+        username: string;
+        nickname: string;
+        followers_count: number,
+        create_time: Date,
+    };
 
     type CommentType = {
         video_id: number;
@@ -58,17 +64,21 @@ const availableParent: number[] = dbParentComments.map(v => v.comment_id);
 const TOTAL_CHUNKS = 1_000_000; // adjust as needed
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 for (let i = 0; i < TOTAL_CHUNKS; i++) {
-  const randomChunk = faker.number.int({ min: 2, max: 6 });
-  const allComments: CommentType[] = [];
+  const randomCommentChunk = faker.number.int({ min: 2, max: 6 });
+  const randomUserChunk = faker.number.int({ min: 1, max: 3 });
+  const newComments: CommentType[] = [];
+  const newUsers: UserType[] = [];
 
-  for (let j = 0; j < randomChunk; j++) {
+
+  // Generate Random Comment
+  for (let j = 0; j < randomCommentChunk; j++) {
     const parentRandom =
       faker.helpers.maybe(
         () => faker.helpers.arrayElement(availableParent),
         { probability: 0.5 }
       ) ?? null;
 
-    allComments.push({
+    newComments.push({
       video_id: faker.helpers.arrayElement(availableVideoId),
       user_id: faker.helpers.arrayElement(availableUserId),
       level: parentRandom == null ? 0 : 1,
@@ -78,28 +88,50 @@ for (let i = 0; i < TOTAL_CHUNKS; i++) {
     });
   }
 
-  // Insert once per chunk, not once per comment
-  const result = await db
-    .insert(comments)
-    .values(allComments)
-    .returning({
-      comment_id: comments.comment_id,
-      level: comments.level,
-    });
-
+  // Insert Comments
+    const result = await db
+      .insert(comments)
+      .values(newComments)
+      .returning({
+        comment_id: comments.comment_id,
+        level: comments.level,
+      });
+  
   // Only keep level-0 comments as future parents, filter out undefined
   const newParents = result
     .filter(v => v.level === 0)
     .map(v => v.comment_id);
 
   availableParent.push(...newParents);
+  // Generate Random Users
+  for (let j = 0; j < randomUserChunk; j++) {
+    newUsers.push({
+      username : faker.person.fullName(),
+      nickname : faker.person.firstName(),
+      followers_count:0,
+      create_time: new Date(),
+    });
+  }
+
+  // Insert Users
+  const userResult = await db
+    .insert(users)
+    .values(newUsers)
+    .returning({
+      user_id: users.user_id,
+    });
+
+  // Only keep level-0 comments as future parents, filter out undefined
+  const newUsersId = userResult.map(v => v.user_id);
+
+  availableUserId.push(...newUsersId);
 
   if (i % 1000 === 0) {
     console.log(`Seeded ${i} chunks...`);
   }
 
   const delaySeconds = faker.number.int({ min: 2, max: 8 });
-  console.log(`Waiting ${delaySeconds}s before next chunk...`);
+  console.log(`Waiting ${delaySeconds}s before next chunk...`); 
   await sleep(delaySeconds * 1000);
 }
 
@@ -109,13 +141,7 @@ await app.close();
 bootstrap();
 
 
-    // type UserType = {
-    //     user_id: number;
-    //     username: string;
-    //     nickname: string;
-    //     followers_count: number,
-    //     create_time: Date,
-    // };
+    
     // type videoType = {
     //     video_id: number,
     //     title: string,

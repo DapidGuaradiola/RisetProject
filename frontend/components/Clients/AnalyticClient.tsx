@@ -1,7 +1,7 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { subscribeToStream } from '@/components/api/analyticsApi';
-import type { AnalyticsState } from '../Types/Analytics';
+import type { AnalyticsState, UserSignUp } from '../Types/Analytics';
 import { TopReplier, TopVideo, CommentsByMinute } from '../Types/Analytics';
 interface AnalyticsContextValue extends AnalyticsState {
     setFilters: (filters: Partial<AnalyticsState['filters']>) => void;
@@ -13,9 +13,10 @@ const initialState: AnalyticsState = {
     topVideos: [],
     commentsByMinute: [],
     topRepliers: [],
-    loading: { topVideos: true, commentsByMinute: true, topRepliers: true },
-    error: { topVideos: null, commentsByMinute: null, topRepliers: null },
-    durations: { topVideos: null, commentsByMinute: null, topRepliers: null },
+    userSignUp: [],
+    loading: { topVideos: true, commentsByMinute: true, topRepliers: true, userSignUp: true },
+    error: { topVideos: null, commentsByMinute: null, topRepliers: null, userSignUp: null },
+    durations: { topVideos: null, commentsByMinute: null, topRepliers: null, userSignUp: null },
     filters: { days: 1, hours: 1, limit: 5 },
 };
 
@@ -35,7 +36,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
         }));
 
         const cleanup = subscribeToStream<TopVideo>(
-            '/top-videos',
+            'comments/top-videos',
             { limit: state.filters.limit, days: state.filters.days },
             (msg) => {
                 setState((prev) => ({
@@ -66,8 +67,8 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
         }));
 
         const cleanup = subscribeToStream<CommentsByMinute>(
-            '/by-minute',
-            { limit: state.filters.hours },
+            'comments/by-minute',
+            { hours: state.filters.hours },
             (msg) => {
                 setState((prev) => ({
                     ...prev,
@@ -97,7 +98,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
         }));
 
         const cleanup = subscribeToStream<TopReplier>(
-            '/top-repliers',
+            'comments/top-repliers',
             { limit: state.filters.limit, days: state.filters.days },
             (msg) => {
                 setState((prev) => ({
@@ -118,6 +119,37 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
 
         return cleanup;
     }, [state.filters.limit, state.filters.days]);
+
+    //Inserted User Count by minute
+    useEffect(() => {
+        setState((prev) => ({
+            ...prev,
+            loading: { ...prev.loading, userSignUp: true },
+            error: { ...prev.error, userSignUp: null },
+        }));
+
+        const cleanup = subscribeToStream<UserSignUp>(
+            'users/user-signed-up',
+            { hours: state.filters.hours},
+            (msg) => {
+                setState((prev) => ({
+                    ...prev,
+                    userSignUp: msg.data,
+                    durations: { ...prev.durations, userSignup: msg.duration },
+                    loading: { ...prev.loading, userSignup: false },
+                }));
+            },
+            () => {
+                setState((prev) => ({
+                    ...prev,
+                    loading: { ...prev.loading, userSignup: false },
+                    error: { ...prev.error, userSignup: 'Connection lost' },
+                }));
+            },
+        );
+        return cleanup;
+    }, []);
+
 
     return (
         <AnalyticsContext.Provider value={{ ...state, setFilters }}>

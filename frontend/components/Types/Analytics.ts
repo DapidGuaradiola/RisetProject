@@ -14,24 +14,32 @@ export interface TopReplier {
   reply_count: number;
 }
 
+export interface UserSignUp {
+  user_count:number,
+}
+
 export interface AnalyticsState {
   topVideos: TopVideo[];
   commentsByMinute: CommentsByMinute[];
   topRepliers: TopReplier[];
+  userSignUp: UserSignUp[];
   loading: {
     topVideos: boolean;
     commentsByMinute: boolean;
     topRepliers: boolean;
+    userSignUp: boolean;
   };
   error: {
     topVideos: string | null;
     commentsByMinute: string | null;
     topRepliers: string | null;
+    userSignUp: string | null;
   };
   durations: {
     topVideos: number | null;
     commentsByMinute: number | null;
     topRepliers: number | null;
+    userSignUp: number | null;
   };
   filters: {
     days: number;

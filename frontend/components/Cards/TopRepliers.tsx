@@ -21,7 +21,7 @@ export function TopRepliersCard() {
   return (
     <div className="card">
       <div className="card-header">
-        <h2>Users with Most Replies</h2>
+        <h2>Trending Topics</h2>
         {durations.topRepliers != null && (
           <span className="duration">{durations.topRepliers.toFixed(1)} ms</span>
         )}

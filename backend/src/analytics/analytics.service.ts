@@ -27,6 +27,7 @@ export class AnalyticsService {
     console.log(`Each Queries Separator  ::::: [Duration] ${duration} ms`);
     return { result: result as unknown as T[], duration };
   }
+
   async streamComments() {
     const res = await this.ch.query({
       query: 'SELECT * FROM comments_storage',
@@ -41,7 +42,7 @@ export class AnalyticsService {
   }
 
   /** Videos with the most comments */
-  async topVideosByComments(limit = 5, days=1) {
+  async topVideosByComments(limit = 5, days = 1) {
     const query = `
       SELECT
         video_id,
@@ -52,10 +53,10 @@ export class AnalyticsService {
       ORDER BY comment_count DESC
       LIMIT {limit:UInt32}
     `;
-    return this.run<{ video_id: string; comment_count: number }>(query, { limit, days});
+    return this.run<{ video_id: string; comment_count: number }>(query, { limit, days });
   }
-   
-// 
+
+  // 
   /** Comment volume bucketed by minute */
   async commentsByMinute(hours = 24) {
     const query = `
@@ -71,7 +72,7 @@ export class AnalyticsService {
   }
 
   /** Comment & Topics with the most replies (comments where parent_comment_id is not null) */
-  async topUsersByReplies(limit = 5, days=1) {
+  async topUsersByReplies(limit = 5, days = 1) {
     const query = `
       SELECT
           parent_comment_id AS top_comment_id,
@@ -85,6 +86,16 @@ export class AnalyticsService {
       ORDER BY reply_count DESC
       LIMIT {limit:UInt32}
       `;
-    return this.run<{ top_comment_id: number; topic: Text, reply_count: number }>(query, { limit, days});
+    return this.run<{ top_comment_id: number; topic: Text, reply_count: number }>(query, { limit, days });
+  }
+
+  async userSignedUp() {
+    const query = `
+      SELECT
+        count() AS user_count
+      FROM users_storage
+      WHERE create_time >= toStartOfHour(now())
+      `;
+    return this.run<{ user_count: number }>(query);
   }
 }

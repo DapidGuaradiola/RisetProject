@@ -4,6 +4,8 @@ import { FiltersBar } from '@/components/filterBar';
 import { TopVideosCard } from '@/components/Cards/TopVideos';
 import { CommentsTimelineCard } from '@/components/Cards/CommentsTimeline';
 import { TopRepliersCard } from '@/components/Cards/TopRepliers';
+import UserSignedUp from '@/components/Cards/UserSignedUp';
+
 import './analytics.css';
 
 export default function AnalyticsPage() {
@@ -17,6 +19,7 @@ export default function AnalyticsPage() {
           <CommentsTimelineCard />
           <TopRepliersCard />
         </div>
+        <UserSignedUp/>
       </div>
     </AnalyticsProvider>
   );

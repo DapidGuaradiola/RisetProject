@@ -62,4 +62,18 @@ export class AnalyticsController {
       })),
     );
   }
+
+  @Sse('/users/user-signed-up')
+  StreamUserSignUp(): Observable<MessageEvent> {
+    return interval(1000).pipe(
+      switchMap(() =>
+        this.analyticsService.userSignedUp(
+        ),
+      ),
+      map(({ result, duration }) => ({
+        data: { data: result, duration } as AnalyticsMessage<any>,
+      })),
+    );
+  }
+
 }

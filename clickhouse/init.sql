@@ -41,3 +41,42 @@ SELECT
     if(create_time IS NULL, NULL, fromUnixTimestamp64Micro(create_time)) AS create_time
 FROM comments
 WHERE __deleted = 'false';
+
+
+
+-- users 
+
+CREATE TABLE users
+(
+    user_id UInt64,
+    username String,
+    nickname String,
+    followers_count integer,
+    create_time Nullable(Int64),
+    __deleted String,
+    __table String,
+    __lsn Int64
+) ENGINE = Kafka()
+SETTINGS
+    kafka_broker_list = 'kafka:9092',
+    kafka_topic_list = 'analytics.public.users',
+    kafka_group_name = 'clickhouse_users_group',
+    kafka_format = 'JSONEachRow';
+
+CREATE TABLE users_storage
+(
+    user_id UInt64,
+    username String,
+    nickname String,
+    followers_count integer,
+    create_time Nullable(DateTime64(6))
+) ENGINE = MergeTree ORDER BY user_id;
+
+CREATE MATERIALIZED VIEW users_mv TO users_storage AS
+SELECT
+    user_id,
+    username,
+    nickname,
+    followers_count,
+    if(create_time IS NULL, NULL, fromUnixTimestamp64Micro(create_time)) AS create_time
+FROM users
