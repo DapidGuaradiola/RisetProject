@@ -15,22 +15,25 @@ export default function FormComment({
   replyVideoId: number | undefined;
 }) {
   const [reply, setReply] = useState(false);
-  const {addComment,setAddComment} = useContentContext();
+  const { addComment, comments, setAddComment, setComments } = useContentContext();
   let handleReply = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const newComment = {
+      video_id: replyVideoId,
+      parent_comment_id: parent,
+      level: (isRoot ? 0 : parentLevel! + 1),
+      comment: addComment,
+      user_id: replyUserId,
+    }
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/comments`, {
       method: "POST",
       headers: { "Content-Type": "Application/json" },
-      body: JSON.stringify({
-        video_id: replyVideoId,
-        parent_comment_id: parent,
-        level: (isRoot? 0 : parentLevel! + 1),
-        comment: addComment,
-        user_id: replyUserId,
-      }),
+      body: JSON.stringify(newComment),
     });
     if (res.ok) {
+      const returnedComment = await res.json();
       setAddComment("");
+      setComments([...comments, returnedComment]);
     }
   };
   let handleButtonReply = () => {
@@ -48,7 +51,7 @@ export default function FormComment({
       <form
         onSubmit={(e) => handleReply(e)}
         className="w-full flex"
-        hidden={(!reply&&!isRoot)}
+        hidden={(!reply && !isRoot)}
       >
         <input
           name="comment"

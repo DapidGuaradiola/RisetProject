@@ -20,8 +20,7 @@ type usersType = {
 
 type paramType = {
   data: CommentItem;
-  dataReplies: CommentItem[];
-  allReplies:  Record<number, CommentItem[]>
+  dataReplies?: CommentItem[];
   videoId: number;
   userId: number;
 };
@@ -32,12 +31,11 @@ export default function Comment({
   dataReplies,
   videoId,
   userId,
-  allReplies,
 }: paramType) {
   return (
     <article
       key={data.comment_id}
-      className="w-full min-h-25 flex items-start gap-5 bg-red mt-4"
+      className="w-full overflow-scroll scrollbar-none flex items-start gap-5 bg-red mt-4"
     >
       <div className="shrink-0">
         <img
@@ -62,7 +60,7 @@ export default function Comment({
             />
           </div>
         </div>
-        {dataReplies?<Replies allReplies={allReplies}replies={dataReplies} userId={userId} videoId={videoId} />:''}
+        {dataReplies ? <Replies replies={dataReplies} userId={userId} videoId={videoId} /> : ''}
       </div>
     </article>
   );

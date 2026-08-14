@@ -7,11 +7,10 @@ import { useContentContext } from "./Clients/ContentClients";
 const PAGE_SIZE = 2;
 
 export default function VideoGrid() {
-  const { activeIndex, setActiveIndex } = useContentContext();
+  const { isVideoLoading, setIsVideoLoading, activeIndex, setActiveIndex } = useContentContext();
 
   const [videoList, setVideoList] = useState<videoType[]>([]);
   const [offset, setOffset] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +25,7 @@ export default function VideoGrid() {
       }
 
       loadingRef.current = true;
-      setIsLoading(true);
+      setIsVideoLoading(true);
       setError(null);
 
       try {
@@ -83,12 +82,12 @@ export default function VideoGrid() {
         );
       } finally {
         loadingRef.current = false;
-        setIsLoading(false);
+        setIsVideoLoading(false);
       }
     },
     [hasMore, setActiveIndex]
   );
-
+  
   /*
    * Initial fetch
    */
@@ -280,8 +279,8 @@ export default function VideoGrid() {
           </div>
         )}
 
-        {isLoading && (
-          <div className="p-4 text-center">
+        {isVideoLoading && (
+          <div className=" h-full w-full h-125 max-h-125 gap-6 overflow-scroll scrollbar-none">
             Loading...
           </div>
         )}
