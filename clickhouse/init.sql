@@ -15,7 +15,7 @@ CREATE TABLE comments
 ) ENGINE = Kafka()
 SETTINGS
     kafka_broker_list = 'kafka:9092',
-    kafka_topic_list = 'analytics.public.comments',
+    kafka_topic_list = 'contents.public.comments',
     kafka_group_name = 'clickhouse_comments_group_v2',
     kafka_format = 'JSONEachRow';
 
@@ -52,6 +52,7 @@ CREATE TABLE users
     username String,
     nickname String,
     followers_count integer,
+    trust_score integer,
     create_time Nullable(Int64),
     __deleted String,
     __table String,
@@ -59,7 +60,7 @@ CREATE TABLE users
 ) ENGINE = Kafka()
 SETTINGS
     kafka_broker_list = 'kafka:9092',
-    kafka_topic_list = 'analytics.public.users',
+    kafka_topic_list = 'users.public.users',
     kafka_group_name = 'clickhouse_users_group',
     kafka_format = 'JSONEachRow';
 
@@ -68,6 +69,7 @@ CREATE TABLE users_storage
     user_id UInt64,
     username String,
     nickname String,
+    trust_score integer,
     followers_count integer,
     create_time Nullable(DateTime64(6))
 ) ENGINE = MergeTree ORDER BY user_id;
@@ -78,5 +80,6 @@ SELECT
     username,
     nickname,
     followers_count,
+    trust_score,
     if(create_time IS NULL, NULL, fromUnixTimestamp64Micro(create_time)) AS create_time
 FROM users
