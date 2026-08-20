@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule,ConfigService, } from '@nestjs/config';
+import { ConfigModule, ConfigService, } from '@nestjs/config';
 import { ClickhouseService } from './clickhouse.service';
-import { ClickHouseClient, createClient} from '@clickhouse/client';
+import { ClickHouseClient, createClient } from '@clickhouse/client';
 import { ClickhouseController } from './clickhouse.controller';
-export const CLICKHOUSE = Symbol('CLICKHOUSE_CONNECTION');
+import {CLICKHOUSE} from './clickhouse.constants';
 @Module({
     imports: [ConfigModule],
     providers: [ClickhouseService, {

@@ -1,5 +1,5 @@
 import { timeStamp } from "console";
-import { mysqlTable, int, varchar, date } from "drizzle-orm/mysql-core";
+import { mysqlTable, int, varchar, date, datetime } from "drizzle-orm/mysql-core";
 export const users = mysqlTable('users', {
     user_id: int().primaryKey().autoincrement(),
     username: varchar({ length: 255 }).unique(),
@@ -7,5 +7,5 @@ export const users = mysqlTable('users', {
     nickname: varchar({ length: 255 }),
     followers_count: int(),
     trust_score: int(),
-    create_time: date(),
+    create_time: datetime({mode:'date'}),
 })

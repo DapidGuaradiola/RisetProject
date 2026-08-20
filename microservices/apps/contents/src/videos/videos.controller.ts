@@ -6,11 +6,16 @@ import { UpdateVideoDto } from './dto/update-video.dto';
 
 @Controller()
 export class VideosController {
-  constructor(private readonly videosService: VideosService) {}
+  constructor(private readonly videosService: VideosService) { }
 
   @MessagePattern('contents.video.create')
   create(@Payload() createVideoDto: CreateVideoDto) {
     return this.videosService.create(createVideoDto);
+  }
+
+  @MessagePattern('contents.videos.findAllId')
+  async findAllId() {
+    return await this.videosService.findAllId();
   }
 
   @MessagePattern('contents.video.findAllVideos')

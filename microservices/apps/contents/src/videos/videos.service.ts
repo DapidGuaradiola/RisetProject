@@ -1,15 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { CreateVideoDto } from './dto/create-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
-
+import type { DrizzleDB } from 'src/db/drizzle';
+import { DRIZZLE } from 'src/db/db.module';
+import { videos } from 'src/db/schema';
+import { eq } from 'drizzle-orm';
 @Injectable()
 export class VideosService {
+  constructor(
+    @Inject(DRIZZLE)
+    private readonly db: DrizzleDB) { }
+
   create(createVideoDto: CreateVideoDto) {
     return 'This action adds a new video';
   }
 
   findAll() {
     return `This action returns all videos`;
+  }
+
+  async findAllId() {
+    const res = await this.db.select({ video_id: videos.video_id }).from(videos);
+    return res.map(v => v.video_id);
   }
 
   findOne(id: number) {

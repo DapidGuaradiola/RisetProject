@@ -42,8 +42,6 @@ SELECT
 FROM comments
 WHERE __deleted = 'false';
 
-
-
 -- users 
 
 CREATE TABLE users
@@ -60,7 +58,7 @@ CREATE TABLE users
 ) ENGINE = Kafka()
 SETTINGS
     kafka_broker_list = 'kafka:9092',
-    kafka_topic_list = 'users.public.users',
+    kafka_topic_list = 'users.usersDatabase.users',
     kafka_group_name = 'clickhouse_users_group',
     kafka_format = 'JSONEachRow';
 
@@ -82,4 +80,71 @@ SELECT
     followers_count,
     trust_score,
     if(create_time IS NULL, NULL, fromUnixTimestamp64Micro(create_time)) AS create_time
-FROM users
+FROM users;
+
+CREATE DICTIONARY users_dict
+(
+    user_id UInt64,
+    trust_score UInt8
+)
+PRIMARY KEY user_id
+SOURCE(CLICKHOUSE(USER  'default' PASSWORD 'root' DB 'analytics' TABLE 'users_storage'))
+LAYOUT(HASHED())
+LIFETIME(MIN 300 MAX 600);
+
+CREATE TABLE video_comment_totals
+(
+    video_id UInt64,
+    total_comments UInt64
+)
+ENGINE = SummingMergeTree()
+ORDER BY video_id;  
+
+CREATE MATERIALIZED VIEW comments_total_sum
+TO video_comment_totals
+AS
+SELECT
+    video_id,
+    count() AS total_comments
+FROM comments_storage
+WHERE dictGet('users_dict', 'trust_score', user_id) > 5
+GROUP BY video_id;
+
+CREATE TABLE video_comment_minutes
+(
+    video_id UInt64,
+    minute DateTime,
+    comments_this_minute AggregateFunction(count)
+)   
+ENGINE = AggregatingMergeTree()
+ORDER BY (video_id, minute);
+
+CREATE MATERIALIZED VIEW comments_minute_avg
+TO video_comment_minutes
+AS
+SELECT
+    video_id,
+    toStartOfMinute(create_time) AS minute,
+    countState() AS comments_this_minute
+FROM comments_storage
+WHERE dictGet('users_dict', 'trust_score', user_id) > 5
+GROUP BY video_id, minute;
+
+CREATE TABLE video_bot_comment_minutes
+(
+    video_id UInt64,
+    minute DateTime,
+    comments_this_minute AggregateFunction(count)
+)
+ENGINE = AggregatingMergeTree()
+ORDER BY (video_id, minute);
+
+CREATE MATERIALIZED VIEW bot_comments_minute_avg
+TO video_bot_comment_minutes
+AS
+SELECT
+    toStartOfMinute(create_time) AS minute,
+    countState() AS comments_this_minute
+FROM comments_storage
+WHERE dictGet('users_dict', 'trust_score', user_id) < 6
+GROUP BY minute;

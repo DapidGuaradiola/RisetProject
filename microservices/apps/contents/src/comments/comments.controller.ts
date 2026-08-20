@@ -6,12 +6,22 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Controller()
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(private readonly commentsService: CommentsService) { }
 
   @MessagePattern('contents.comments.create')
   create(@Payload() createCommentDto: CreateCommentDto) {
     return this.commentsService.create(createCommentDto);
-    
+  }
+
+  @MessagePattern('contents.comments.simulate')
+  async simulate(@Payload() { newComments }: { newComments: CreateCommentDto[] }) {
+    console.log("insert hit, [data]", newComments);
+    return await this.commentsService.simulate(newComments);
+  }
+
+  @MessagePattern('contents.comments.findAllId')
+  async findAllId() {
+    return await this.commentsService.findAllId();
   }
 
   @MessagePattern('findAllComments')

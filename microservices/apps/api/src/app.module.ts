@@ -6,19 +6,19 @@ import { ClientsModule, Transport, } from '@nestjs/microservices';
 @Module({
   imports: [
     ConfigModule,
-    ClientsModule.registerAsync([
-      {
-        imports: [ConfigModule],
-        name: 'USERS_SERVICE',
-        useFactory: async (configService: ConfigService) => ({
-          transport: Transport.TCP,
-          options: {
-            host: configService.get<string>('TCP_USERSSERVICE_HOST'),
-            port: Number(configService.get('TCP_USERSSERVICE_PORT')),
-          },
-        }),
-        inject: [ConfigService],
-      },
+      ClientsModule.registerAsync([
+        {
+          imports: [ConfigModule],
+          name: 'USERS_SERVICE',
+          useFactory: async (configService: ConfigService) => ({
+            transport: Transport.TCP,
+            options: {
+              host: configService.get<string>('TCP_USERSSERVICE_HOST'),
+              port: Number(configService.get('TCP_USERSSERVICE_PORT')),
+            },
+          }),
+          inject: [ConfigService],
+        },
       {
         imports: [ConfigModule],
         name: 'CONTENTS_SERVICE',

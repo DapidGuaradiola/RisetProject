@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Inject, Sse, MessageEvent } from '@nestjs/common';
+import { Controller, Get, Post, Inject, Sse, MessageEvent, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { interval, map, Observable, switchMap } from 'rxjs';
@@ -17,19 +17,69 @@ export class AppController {
     private readonly contentsService: ClientProxy,
     @Inject('QUERIES_SERVICE')
     private readonly queriesService: ClientProxy,
-
+    private readonly apiService: AppService,
   ) { }
 
   @Get('users')
-  checkUser(){
-    const res = this.usersService.send('cekidot',{});
+  checkUser() {
+    const res = this.usersService.send('cekidot', {});
     return res;
   }
 
   @Post('users')
   async createUsers(): Promise<Observable<string>> {
-    return await this.usersService.send('createUser', { username: "david", nickname: "dvd123",password:"halodek", followers_count: 50, trust_score:6 });
+    return await this.usersService.send('createUser', { username: "david", nickname: "dvd123", password: "halodek", followers_count: 50, trust_score: 6 });
   }
+
+  @Post('generate')
+  async generateData() {
+    return await this.apiService.generateData();
+  }
+
+  @Post('generate/stop')
+  stopGenerate() {
+    return this.apiService.stopGeneration();
+  }
+
+  @Get('checkContentsConnection')
+  checkContent() {
+    return this.contentsService.send('contents.check', {})
+  }
+
+  @Sse('totalComments')
+  streamCommentsByMinute(): Observable<MessageEvent> {
+    return interval(1000).pipe(
+      switchMap(() =>
+        this.queriesService.send('queries.clickhouse.getCommentTotal', {})),
+      map(({ result, duration }) => ({
+        data: { data: result, duration } as AnalyticsMessage<any>,
+      })),
+    );
+  }
+
+  @Sse('filteredCommentsPerMinute')
+  streamFilteredCommentPerMinutes(): Observable<MessageEvent> {
+    return interval(1000).pipe(
+      switchMap(() =>
+        this.queriesService.send('queries.clickhouse.getFilteredCommentsPerMinute', {})),
+      map(({ result, duration }) => ({
+        data: { data: result, duration } as AnalyticsMessage<any>,
+      })),
+    );
+  }
+
+  @Sse('CommentsPerMinute')
+  streamCommentPerMinutes(): Observable<MessageEvent> {
+    return interval(1000).pipe(
+      switchMap(() =>
+        this.queriesService.send('queries.clickhouse.getCommentsPerMinute', {})),
+      map(({ result, duration }) => ({
+        data: { data: result, duration } as AnalyticsMessage<any>,
+      })),
+    );
+  }
+
+
 
   //UserSignUpQuery
   // @Sse('/users/user-signed-up')
