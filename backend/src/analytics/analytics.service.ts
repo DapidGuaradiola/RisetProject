@@ -98,4 +98,14 @@ export class AnalyticsService {
       `;
     return this.run<{ user_count: number }>(query);
   }
+
+  async botComments() {
+    const query = `
+      SELECT
+        count() AS user_count
+      FROM users_storage
+      WHERE create_time >= toStartOfHour(now())
+      `;
+    return this.run<{ user_count: number }>(query);
+  }
 }

@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:3000/analytics/';
+const BASE_URL = 'http://localhost:3006/';
 
 export interface SseMessage<T> {
   data: T[];

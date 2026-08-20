@@ -5,6 +5,7 @@ import { TopVideosCard } from '@/components/Cards/TopVideos';
 import { CommentsTimelineCard } from '@/components/Cards/CommentsTimeline';
 import { TopRepliersCard } from '@/components/Cards/TopRepliers';
 import UserSignedUp from '@/components/Cards/UserSignedUp';
+import BotCard from '@/components/Cards/BotCard';
 
 import './analytics.css';
 
@@ -19,7 +20,10 @@ export default function AnalyticsPage() {
           <CommentsTimelineCard />
           <TopRepliersCard />
         </div>
-        <UserSignedUp/>
+        <div className='absolute right-0 top-0 flex'>
+          <UserSignedUp />
+          <BotCard />      
+        </div>
       </div>
     </AnalyticsProvider>
   );

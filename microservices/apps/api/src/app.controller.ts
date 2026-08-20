@@ -79,7 +79,59 @@ export class AppController {
     );
   }
 
+  @Sse('top-videos')
+  streamTopVideos(
+    @Query('limit') limit?: string,
+    @Query('days') days?: string,
+  ): Observable<MessageEvent> {
+    const params = { limit, days };
+    return interval(1000).pipe(
+      switchMap(() =>
+        this.queriesService.send('queries.clickhouse.getTopVideos', params)
+      ),
+      map(({ result, duration }) => ({ data: { data: result, duration } as AnalyticsMessage<any> })),
+    );
+  }
 
+  @Sse('top-repliers')
+  streamTopRepliers(
+    @Query('limit') limit?: string,
+    @Query('days') days?: string,
+  ): Observable<MessageEvent> {
+    const params = { limit, days };
+    return interval(1000).pipe(
+      switchMap(() =>
+        this.queriesService.send('queries.clickhouse.getTopReplies', params)
+      ),
+      map(({ result, duration }) => ({
+        data: { data: result, duration } as AnalyticsMessage<any>,
+      })),
+    );
+  }
+
+  @Sse('user-signed-up')
+  StreamUserSignUp(): Observable<MessageEvent> {
+    return interval(1000).pipe(
+      switchMap(() =>
+        this.queriesService.send('queries.clickhouse.getUserSignedUp', {})
+      ),
+      map(({ result, duration }) => ({
+        data: { data: result, duration } as AnalyticsMessage<any>,
+      })),
+    );
+  }
+
+  @Sse('bot-comments')
+  botCommentsCount(): Observable<MessageEvent> {
+    return interval(1000).pipe(
+      switchMap(() =>
+        this.queriesService.send('queries.clickhouse.botCommentsCount', {})
+      ),
+      map(({ result, duration }) => ({
+        data: { data: result, duration } as AnalyticsMessage<any>,
+      })),
+    );
+  }
 
   //UserSignUpQuery
   // @Sse('/users/user-signed-up')

@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ClickhouseService } from './clickhouse.service';
 export interface Message<T> {
     result: T[];
@@ -32,4 +32,33 @@ export class ClickhouseController {
         const res = await this.chService.getFilteredCommentsPerMinutes();
         return res;
     }
+
+    @MessagePattern('queries.clickhouse.getTopVideos')
+    async getTopVideos(
+        @Payload() { limit, days }: { limit: string; days: string }
+    ) {
+        const res = await this.chService.topVideosByComments(Number(limit), Number(days));
+        return res;
+    }
+
+    @MessagePattern('queries.clickhouse.getTopReplies')
+    async getTopReplies(
+        @Payload() { limit, days }: { limit: string; days: string }
+    ) {
+        const res = await this.chService.topComments(Number(limit), Number(days));
+        return res;
+    }
+
+    @MessagePattern('queries.clickhouse.getUserSignedUp')
+    async getUserSignedUp() {
+        const res = await this.chService.userSignedUp();
+        return res;
+    }
+
+    @MessagePattern('queries.clickhouse.botCommentsCount')
+    async botCommentsCount() {
+        const res = await this.chService.botCommentsCount();
+        return res;
+    }
+
 }

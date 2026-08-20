@@ -3,7 +3,7 @@ import { useAnalytics } from "../Clients/AnalyticClient"
 export default function UserSignedUp() {
     const { userSignUp, durations } = useAnalytics();
     return (
-        <div className="absolute w-50 border border-white h-20 right-0 top-0 rounded rounded-2xl">
+        <div className="w-50 border border-white h-20 rounded rounded-2xl">
             <div className="flex flex-col">
                 <div>
                     {new Date(Date.now()).toLocaleString()}

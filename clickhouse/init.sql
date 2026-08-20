@@ -111,40 +111,34 @@ WHERE dictGet('users_dict', 'trust_score', user_id) > 5
 GROUP BY video_id;
 
 CREATE TABLE video_comment_minutes
-(
-    video_id UInt64,
+(   
     minute DateTime,
     comments_this_minute AggregateFunction(count)
 )   
 ENGINE = AggregatingMergeTree()
-ORDER BY (video_id, minute);
+ORDER BY minute;
 
 CREATE MATERIALIZED VIEW comments_minute_avg
 TO video_comment_minutes
 AS
 SELECT
-    video_id,
     toStartOfMinute(create_time) AS minute,
     countState() AS comments_this_minute
 FROM comments_storage
 WHERE dictGet('users_dict', 'trust_score', user_id) > 5
-GROUP BY video_id, minute;
+GROUP BY minute;
 
-CREATE TABLE video_bot_comment_minutes
+CREATE TABLE bot_comments
 (
-    video_id UInt64,
-    minute DateTime,
-    comments_this_minute AggregateFunction(count)
+    bot_comments_count Nullable(UInt64)
 )
-ENGINE = AggregatingMergeTree()
-ORDER BY (video_id, minute);
+ENGINE = SummingMergeTree()
+ORDER BY tuple();
 
-CREATE MATERIALIZED VIEW bot_comments_minute_avg
-TO video_bot_comment_minutes
+CREATE MATERIALIZED VIEW bot_comments_mv
+TO bot_comments
 AS
 SELECT
-    toStartOfMinute(create_time) AS minute,
-    countState() AS comments_this_minute
+    count() AS bot_comments_count
 FROM comments_storage
-WHERE dictGet('users_dict', 'trust_score', user_id) < 6
-GROUP BY minute;
+WHERE dictGet('users_dict', 'trust_score', user_id) < 6;
