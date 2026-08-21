@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useContentContext } from "../Clients/ContentClients";
 import { UserType } from "../Types/UserType";
+import TrustScoreDonut from "./TrustScoreDonut";
 
 const PAGE_SIZE = 10;
 
@@ -93,7 +94,7 @@ export default function UserSelector() {
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         className="group relative flex items-center gap-2.5 p-1.5 pr-3.5 bg-white/90 hover:bg-white backdrop-blur-md border border-gray-200/90 shadow-md hover:shadow-lg rounded-full transition-all duration-200 cursor-pointer active:scale-95"
-        title={currentUser ? `Active: ${currentUser.nickname || currentUser.username}` : "Select User"}
+        title={currentUser ? `Active: ${currentUser.nickname || currentUser.username} (Trust Score: ${currentUser.trust_score ?? 0}/10)` : "Select User"}
       >
         {/* Placeholder profile avatar icon */}
         <div className="relative w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 text-white flex items-center justify-center shadow-inner overflow-hidden font-bold text-sm uppercase">
@@ -113,10 +114,16 @@ export default function UserSelector() {
         </div>
 
         <div className="hidden sm:flex flex-col text-left">
-          <span className="text-xs font-semibold text-gray-800 max-w-[100px] truncate leading-tight">
-            {currentUser?.nickname || currentUser?.username || "Select User"}
-          </span>
-          <span className="text-[10px] text-gray-500 max-w-[100px] truncate leading-tight">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-semibold text-gray-800 max-w-[90px] truncate leading-tight">
+              {currentUser?.nickname || currentUser?.username || "Select User"}
+            </span>
+            {/* Trust Score Donut Bar */}
+            {currentUser?.trust_score !== undefined && (
+              <TrustScoreDonut score={currentUser.trust_score} size={22} strokeWidth={2.5} />
+            )}
+          </div>
+          <span className="text-[10px] text-gray-500 max-w-[110px] truncate leading-tight">
             @{currentUser?.username || "guest"}
           </span>
         </div>
@@ -141,7 +148,7 @@ export default function UserSelector() {
 
       {/* Dropdown Card */}
       {isOpen && (
-        <div className="absolute right-0 mt-2.5 w-80 bg-white/95 backdrop-blur-xl border border-gray-200/90 shadow-2xl rounded-2xl p-3 z-50 transition-all duration-200">
+        <div className="absolute right-0 mt-2.5 w-84 bg-white/95 backdrop-blur-xl border border-gray-200/90 shadow-2xl rounded-2xl p-3 z-50 transition-all duration-200">
           {/* Header */}
           <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-gray-100 px-1">
             <div className="flex items-center gap-2">
@@ -209,13 +216,19 @@ export default function UserSelector() {
 
                       {/* Info */}
                       <div className="min-w-0 flex-1">
-                        <p
-                          className={`text-xs font-semibold truncate leading-tight ${
-                            isSelected ? "text-indigo-950" : "text-gray-800"
-                          }`}
-                        >
-                          {user.nickname || user.username}
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <p
+                            className={`text-xs font-semibold truncate leading-tight ${
+                              isSelected ? "text-indigo-950" : "text-gray-800"
+                            }`}
+                          >
+                            {user.nickname || user.username}
+                          </p>
+                          {/* Trust Score Donut Bar right beside username */}
+                          {user.trust_score !== undefined && (
+                            <TrustScoreDonut score={user.trust_score} size={24} strokeWidth={3} />
+                          )}
+                        </div>
                         <p className="text-[11px] text-gray-400 truncate leading-tight">
                           @{user.username}
                         </p>

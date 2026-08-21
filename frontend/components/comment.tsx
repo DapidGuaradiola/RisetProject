@@ -1,5 +1,16 @@
-import FormComment from "./formReply";
+﻿import FormComment from "./formReply";
 import Replies from "./replies";
+import TrustScoreDonut from "./Cards/TrustScoreDonut";
+import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
+
+type usersType = {
+  user_id: number;
+  username: string;
+  nickname: string;
+  followers_count: number;
+  trust_score?: number;
+};
+
 type CommentItem = {
   comment_id: number;
   video_id: number;
@@ -11,20 +22,12 @@ type CommentItem = {
   user: usersType;
 };
 
-type usersType = {
-  user_id: number;
-  username: string;
-  nickname: string;
-  followers_count: number;
-};
-
 type paramType = {
   data: CommentItem;
   dataReplies?: CommentItem[];
   videoId: number;
   userId: number;
 };
-import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
 
 export default function Comment({
   data,
@@ -46,8 +49,11 @@ export default function Comment({
       </div>
       <div className="flex flex-col">
         <div>
-          <div className="flex-1 min-w-0 ">
+          <div className="flex-1 min-w-0 flex items-center gap-1.5">
             <span className="text-sm text-zinc-500">@{data.user.nickname}</span>
+            {data.user?.trust_score !== undefined && (
+              <TrustScoreDonut score={data.user.trust_score} size={20} strokeWidth={2.5} />
+            )}
           </div>
           <p className="line-clamp-2 truncate">{data.comment}</p>
           {/* action button */}

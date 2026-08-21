@@ -32,6 +32,7 @@ type usersType = {
   username: string;
   nickname: string;
   followers_count: number;
+  trust_score?: number;
 };
 
 export type CommentItem = {
@@ -74,6 +75,7 @@ export default function ContentClients({ children }: { children: ReactNode }) {
     username: "aris.jo2",
     nickname: "Aris Jo",
     followers_count: 1672,
+    trust_score: 6,
   });
 
   return (
