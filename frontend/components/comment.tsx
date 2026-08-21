@@ -57,6 +57,7 @@ export default function Comment({
               parentLevel={data.level}
               replyVideoId={videoId}
               replyUserId={userId}
+              isRoot={false}
             />
           </div>
         </div>

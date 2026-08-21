@@ -61,4 +61,10 @@ export class ClickhouseController {
         return res;
     }
 
+    @MessagePattern('queries.clickhouse.getVideoComments')
+    async getVideoComments(
+        @Payload() { childLimit, selectedParentId, videoId, parentLimit }: { childLimit: number | null, selectedParentId: number | null, videoId: number, parentLimit: number | null }
+    ) {
+        return this.chService.getVideoComment(videoId, childLimit, selectedParentId, parentLimit);
+    }
 }

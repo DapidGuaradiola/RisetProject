@@ -30,6 +30,14 @@ export class AppService {
     return rows.map(row => row.user_id);
   }
 
+  async findOne(user_id: number) {
+    const res = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.user_id, user_id));
+    return res[0];
+  }
+
   async simulate(dto) {
     const convertedUsers = dto.map(u => ({
       ...u,

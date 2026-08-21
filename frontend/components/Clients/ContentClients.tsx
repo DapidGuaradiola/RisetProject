@@ -34,7 +34,7 @@ type usersType = {
 };
 
 
-type CommentItem = {
+export type CommentItem = {
   comment_id: number;
   video_id: number;
   user_id: number;
@@ -46,17 +46,17 @@ type CommentItem = {
 };
 
 
-type ParentComment = {
-  comment_id: number;
-  video_id: number;
-  user_id: number;
-  comment: string;
-  parent_comment_id: number;
-  level: number;
-  create_time: Timestamp;
-  user: usersType;
-  children: CommentItem[] | [];
-};
+  export type ParentComment = {
+    comment_id: number;
+    video_id: number;
+    user_id: number;
+    comment: string;
+    parent_comment_id: number;
+    level: number;
+    create_time: Timestamp;
+    user: usersType;
+    children: CommentItem[] | [];
+  };
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
 export default function ContentClients({ children }: { children: ReactNode }) {

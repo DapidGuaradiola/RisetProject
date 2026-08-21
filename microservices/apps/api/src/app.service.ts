@@ -164,4 +164,16 @@ export class AppService {
   getStatus() {
     return { isGenerating: this.isGenerating };
   }
+
+  async postComment(dto) {
+    const commentData = await firstValueFrom(this.contentsClients.send('contents.comments.postComment', dto));
+    const user_id = commentData.user_id;
+    const userData = await firstValueFrom(this.usersClients.send('users.findOne', user_id));
+    console.log('COMMENT DATA:', JSON.stringify(commentData));
+    console.log('USER DATA:', JSON.stringify(userData));
+    return {
+      ...commentData,
+      user: userData
+    };
+  }
 }

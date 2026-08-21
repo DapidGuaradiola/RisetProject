@@ -6,7 +6,6 @@ import { FormEvent, useMemo, useState, useEffect, Fragment } from "react";
 import FormComment from "./formReply";
 import Comment from "./comment";
 import { useContentContext } from "./Clients/ContentClients";
-import { CommentType } from "./Types/CommentType";
 
 type paramType = {
   userId: number;
@@ -31,7 +30,7 @@ export default function CommentSection({ userId }: paramType) {
       if (selectedParentId != null) params.set('selectedParentId', String(selectedParentId));
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/comments/video/${activeIndex}?${params.toString()}`
+        `http://localhost:3006/api/comments/video/${activeIndex}?${params.toString()}`
       );
 
       const data = await res.json();
@@ -41,19 +40,11 @@ export default function CommentSection({ userId }: paramType) {
       }
     };
     fetchData();
-  }, [activeIndex, comments]);
-  useEffect(()=>{
-    console.log(comments);
-  },[comments]);
+  }, [activeIndex]);
 
-  return isCommentLoading ? (
-    <Fragment >
-      <div className="animate-spin hidden={activeComment} absolute right-0">
-        <svg className="mr-3 size-5 animate-spin ..." viewBox="0 0 24 24"></svg>
-      </div>
-      <p hidden={activeComment}>Loading Comment Data...</p>
-    </Fragment>
-  ) : (
+  console.log("act indx:", activeIndex)
+
+  return (
     <section className={activeComment ? "absolute h-100 max-h-100 overflow-scroll scrollbar-none" : "h-100 max-h-100"} hidden={activeComment}>
       {/* Comment Header  */}
       <div className="w-full max-w-60 border-b border-gray-500 rounded-t-xl">

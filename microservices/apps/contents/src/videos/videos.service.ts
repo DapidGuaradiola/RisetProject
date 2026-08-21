@@ -15,8 +15,17 @@ export class VideosService {
     return 'This action adds a new video';
   }
 
-  findAll() {
-    return `This action returns all videos`;
+  async findAll(offset: number = 0) {
+    try {
+      return await this.db.transaction(async (tx) => {
+        return tx.query.videos.findMany({
+          limit: 2,
+          offset: offset,
+        });
+      });
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   async findAllId() {

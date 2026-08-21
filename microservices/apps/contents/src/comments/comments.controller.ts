@@ -24,6 +24,11 @@ export class CommentsController {
     return await this.commentsService.findAllId();
   }
 
+  @MessagePattern('contents.comments.postComment')
+  postComment(@Payload() dto: CreateCommentDto) {
+    return this.commentsService.postComment(dto);
+  }
+
   @MessagePattern('findAllComments')
   findAll() {
     return this.commentsService.findAll();

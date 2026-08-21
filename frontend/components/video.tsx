@@ -7,7 +7,7 @@ import { useContentContext } from "./Clients/ContentClients";
 const PAGE_SIZE = 2;
 
 export default function VideoGrid() {
-  const { isVideoLoading, setIsVideoLoading, activeIndex, setActiveIndex } = useContentContext();
+  const { isVideoLoading, setIsVideoLoading, activeIndex, setActiveIndex, activeComment } = useContentContext();
 
   const [videoList, setVideoList] = useState<videoType[]>([]);
   const [offset, setOffset] = useState(0);
@@ -25,7 +25,9 @@ export default function VideoGrid() {
       }
 
       loadingRef.current = true;
-      setIsVideoLoading(true);
+      if (videoList.length == 0) {
+        setIsVideoLoading(true);
+      }
       setError(null);
 
       try {
@@ -34,7 +36,7 @@ export default function VideoGrid() {
         });
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/video?${params.toString()}`
+          `http://localhost:3006/api/video?${params.toString()}`
         );
 
         if (!response.ok) {
@@ -82,12 +84,12 @@ export default function VideoGrid() {
         );
       } finally {
         loadingRef.current = false;
-        setIsVideoLoading(false);
+        isVideoLoading ? setIsVideoLoading(false) : '';
       }
     },
     [hasMore, setActiveIndex]
   );
-  
+
   /*
    * Initial fetch
    */
@@ -169,12 +171,6 @@ export default function VideoGrid() {
       {
         root: container,
 
-        /*
-         * Observer hanya aktif pada area tengah.
-         *
-         * 40% atas  + 40% bawah
-         * = 20% area tengah.
-         */
         rootMargin: "-40% 0px -40% 0px",
 
         threshold: [0, 0.5, 1],
@@ -241,16 +237,16 @@ export default function VideoGrid() {
   }, [activeIndex]);
 
   return (
-    <section className="h-full overflow-hidden">
+    <section className={`h-full min-w-[355px] overflow-hidden`}>
       <div
         ref={containerRef}
-        className="grid h-full w-full max-h-125 gap-6 overflow-scroll scrollbar-none"
+        className={`grid h-full ${activeComment ? `w-full` : `min-w-[355px] w-[355px]`} max-h-125 gap-6 overflow-scroll scrollbar-none`}
       >
         {videoList.map((video) => (
           <article
             key={video.video_id}
             data-video-id={video.video_id}
-            className="relative mx-auto h-125 overflow-hidden rounded-3xl"
+            className="relative mx-auto h-125 min-w-full w-full overflow-hidden rounded-3xl"
           >
             <img
               src="https://picsum.photos/800/600?random=1"
@@ -272,16 +268,10 @@ export default function VideoGrid() {
             </div>
           </article>
         ))}
-
+        
         {error && (
           <div className="p-4 text-center text-red-600">
             {error}
-          </div>
-        )}
-
-        {isVideoLoading && (
-          <div className=" h-full w-full h-125 max-h-125 gap-6 overflow-scroll scrollbar-none">
-            Loading...
           </div>
         )}
 

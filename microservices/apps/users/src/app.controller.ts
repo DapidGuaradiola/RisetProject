@@ -23,6 +23,13 @@ export class AppController {
     return await this.appService.findAllId();
   }
 
+  @MessagePattern('users.findOne')
+  async findOne(
+    @Payload() user_id: number
+  ) {
+    return await this.appService.findOne(user_id);
+  }
+
   @MessagePattern('users.simulate')
   async simulate(@Payload() { newUsers }: { newUsers: createUserDTO[] }) {
     return await this.appService.simulate(newUsers);

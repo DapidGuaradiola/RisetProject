@@ -18,9 +18,11 @@ export class VideosController {
     return await this.videosService.findAllId();
   }
 
-  @MessagePattern('contents.video.findAllVideos')
-  findAll() {
-    return this.videosService.findAll();
+  @MessagePattern('contents.videos.findAll')
+  findAll(
+    @Payload() offset: number
+  ) {
+    return this.videosService.findAll(offset);
   }
 
   @MessagePattern('contents.video.findOneVideo')

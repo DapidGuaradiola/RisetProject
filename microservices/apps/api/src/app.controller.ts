@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Inject, Sse, MessageEvent, Query } from '@nestjs/common';
+import { Controller, Get, Post, Inject, Sse, MessageEvent, Query, Param, Body } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { interval, map, Observable, switchMap } from 'rxjs';
+import { CreateCommentDto } from './dto/createCommentDTO';
 
 export interface AnalyticsMessage<T> {
   data: T[];
@@ -131,6 +132,38 @@ export class AppController {
         data: { data: result, duration } as AnalyticsMessage<any>,
       })),
     );
+  }
+
+  @Get('video')
+  async findAll(@Query('offset') offset: number = 0) {
+    return this.contentsService.send('contents.videos.findAll', offset);
+  }
+
+  @Get('comments/video/:videoId')
+  async findByVideoId(
+    @Param('videoId')
+    videoId: number,
+
+    @Query('childLimit')
+    childLimit: number | null,
+
+    @Query('selectedParentId')
+    selectedParentId: number | null,
+
+    @Query('parentLimit')
+    parentLimit: number | null,
+
+  ) {
+    return this.queriesService.send('queries.clickhouse.getVideoComments', { videoId: videoId, childLimit: childLimit, selectedParentId: selectedParentId, parentLimit: parentLimit });
+  }
+
+  @Post('comments')
+  async postComents(
+    @Body() dto: CreateCommentDto
+  ) {
+    const commentData = await this.apiService.postComment(dto);
+    console.log(commentData);
+    return commentData
   }
 
   //UserSignUpQuery
