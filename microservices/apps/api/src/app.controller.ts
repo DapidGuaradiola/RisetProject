@@ -22,9 +22,14 @@ export class AppController {
   ) { }
 
   @Get('users')
-  checkUser() {
-    const res = this.usersService.send('cekidot', {});
-    return res;
+  getAllUsers(
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    return this.usersService.send('users.getAllUsers', {
+      limit: limit ? Number(limit) : 10,
+      offset: offset ? Number(offset) : 0,
+    });
   }
 
   @Post('users')

@@ -1,12 +1,20 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { AppService } from './app.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { Observable } from 'rxjs';
 import type { createUserDTO } from './user.dto';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) { }
+
+  @MessagePattern('users.getAllUsers')
+  async getAllUsers(
+    @Payload() payload?: { limit?: number; offset?: number },
+  ) {
+    const limit = payload?.limit !== undefined ? Number(payload.limit) : 10;
+    const offset = payload?.offset !== undefined ? Number(payload.offset) : 0;
+    return await this.appService.getAllUsers(limit, offset);
+  }
 
   @MessagePattern('createUser')
   async getHello(@Payload() dto: createUserDTO): Promise<string> {
@@ -35,4 +43,3 @@ export class AppController {
     return await this.appService.simulate(newUsers);
   }
 }
-
