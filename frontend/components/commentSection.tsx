@@ -21,26 +21,46 @@ export default function CommentSection({ userId }: paramType) {
 
   //initial state
   useEffect(() => {
+    if (!activeIndex) return;
+
+    const controller = new AbortController();
     setIsCommentLoading(true);
+
     const fetchData = async () => {
+      try {
+        const params = new URLSearchParams();
+        if (parentLimit != null) params.set('parentLimit', String(parentLimit));
+        if (childLimit != null) params.set('childLimit', String(childLimit));
+        if (selectedParentId != null) params.set('selectedParentId', String(selectedParentId));
 
-      const params = new URLSearchParams();
-      if (parentLimit != null) params.set('parentLimit', String(parentLimit));
-      if (childLimit != null) params.set('childLimit', String(childLimit));
-      if (selectedParentId != null) params.set('selectedParentId', String(selectedParentId));
+        const res = await fetch(
+          `http://localhost:3006/api/comments/video/${activeIndex}?${params.toString()}`,
+          { signal: controller.signal }
+        );
 
-      const res = await fetch(
-        `http://localhost:3006/api/comments/video/${activeIndex}?${params.toString()}`
-      );
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
 
-      const data = await res.json();
-      setComments(data.result);
-      if (data) {
+        const data = await res.json();
+        setComments(data.result || []);
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          console.error('Failed to fetch comments:', err);
+          setComments([]);
+        }
+      } finally {
         setIsCommentLoading(false);
       }
     };
+
     fetchData();
-  }, [activeIndex]);
+
+    return () => {
+      controller.abort();
+    };
+  }, [activeIndex, parentLimit, childLimit, selectedParentId]);
+
 
   console.log("act indx:", activeIndex)
 

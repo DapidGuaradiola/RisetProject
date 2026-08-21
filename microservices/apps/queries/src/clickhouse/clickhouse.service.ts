@@ -116,30 +116,36 @@ export class ClickhouseService {
     return this.run<{ bot_comments_count: number }>(query);
   }
 
-  async getVideoComment(videoId: number, childLimit: number | null, selectedParentId: number | null = null, parentLimit: number | null) {
+  async getVideoComment(
+    videoId: number,
+    childLimit: number | null = 10,
+    selectedParentId: number | null = null,
+    parentLimit: number | null = 10,
+  ) {
+    const pLimit = Number(parentLimit) || 10;
+    const cLimit = Number(childLimit) || 10;
+    const vId = Number(videoId);
     const OFFSET = 0;
+
     try {
       const parentResultSet = await this.ch.query({
         query: `
-                SELECT
-                    comment_id,
-                    video_id,
-                    parent_comment_id,
-                    comment,
-                    level,
-                    user_id,
-                    create_time
-                FROM comments_storage
-                WHERE level = 0
-                  AND video_id = {videoId:UInt32}
-                  ${selectedParentId !== null ? 'AND parent_comment_id = {selectedParentId:UInt32}' : ''}
-                ORDER BY comment_id ASC
-                LIMIT {parentLimit:Nullable(UInt32)} BY parent_comment_id
-            `,
+        SELECT
+            comment_id,
+            video_id,
+            parent_comment_id,
+            comment,
+            level,
+            user_id,
+            create_time
+        FROM comments_storage
+        WHERE level = 0
+          AND video_id = {vId:UInt32}
+        ORDER BY comment_id ASC
+        LIMIT {pLimit:UInt32}
+      `,
         format: 'JSONEachRow',
-        query_params: selectedParentId !== null
-          ? { parentLimit, selectedParentId, videoId }
-          : { parentLimit, videoId }
+        query_params: { pLimit, vId },
       });
 
       const parentArr = await parentResultSet.json<{
@@ -152,7 +158,7 @@ export class ClickhouseService {
         create_time: string;
       }>();
 
-      const parentIds = parentArr.map(c => c.comment_id);
+      const parentIds = parentArr.map((c) => c.comment_id);
       let total_duration = 0;
 
       const parentSummary = parentResultSet.response_headers?.['x-clickhouse-summary'];
@@ -164,21 +170,22 @@ export class ClickhouseService {
       if (parentIds.length > 0) {
         const childResultSet = await this.ch.query({
           query: `
-                    SELECT
-                        comment_id,
-                        video_id,
-                        parent_comment_id,
-                        comment,
-                        level,
-                        user_id,
-                        create_time
-                    FROM comments_storage
-                    WHERE video_id = {videoId:UInt32} and parent_comment_id IN ({parentIds:Array(UInt64)})
-                    ORDER BY comment_id ASC
-                    LIMIT {childLimit:Nullable(UInt32)} OFFSET {OFFSET:Nullable(UInt32)}
-                `,
+          SELECT
+              comment_id,
+              video_id,
+              parent_comment_id,
+              comment,
+              level,
+              user_id,
+              create_time
+          FROM comments_storage
+          WHERE video_id = {vId:UInt32} 
+            AND parent_comment_id IN ({parentIds:Array(UInt64)})
+          ORDER BY comment_id ASC
+          LIMIT {cLimit:UInt32} BY parent_comment_id
+        `,
           format: 'JSONEachRow',
-          query_params: { parentIds, childLimit, OFFSET, videoId }
+          query_params: { parentIds, cLimit, vId },
         });
         childArr = await childResultSet.json();
         const childSummary = childResultSet.response_headers?.['x-clickhouse-summary'];
@@ -186,10 +193,13 @@ export class ClickhouseService {
         if (parsedChildSummary) total_duration += Number(parsedChildSummary.elapsed_ns) / 1e6;
       }
 
-      const userIds = Array.from(new Set([
-        ...parentArr.map(c => c.user_id),
-        ...childArr.map(c => c.user_id)
-      ]));
+
+      const userIds = Array.from(
+        new Set([
+          ...parentArr.map((c) => c.user_id),
+          ...childArr.map((c) => c.user_id),
+        ]),
+      );
 
       let usersArr: {
         user_id: number;
@@ -202,17 +212,17 @@ export class ClickhouseService {
       if (userIds.length > 0) {
         const usersResultSet = await this.ch.query({
           query: `
-                    SELECT
-                        user_id,
-                        username,
-                        nickname,
-                        followers_count,
-                        create_time
-                    FROM users_storage
-                    WHERE user_id IN ({userIds:Array(UInt64)})
-                `,
+          SELECT
+              user_id,
+              username,
+              nickname,
+              followers_count,
+              create_time
+          FROM users_storage
+          WHERE user_id IN ({userIds:Array(UInt64)})
+        `,
           format: 'JSONEachRow',
-          query_params: { userIds }
+          query_params: { userIds },
         });
         usersArr = await usersResultSet.json();
         const usersSummary = usersResultSet.response_headers?.['x-clickhouse-summary'];
@@ -220,27 +230,25 @@ export class ClickhouseService {
         if (parsedUsersSummary) total_duration += Number(parsedUsersSummary.elapsed_ns) / 1e6;
       }
 
-      const usersMap = new Map(usersArr.map(u => [u.user_id, u]));
-
-      console.log(`Each Queries Separator ::::: [Duration] ${total_duration} ms`);
+      const usersMap = new Map(usersArr.map((u) => [u.user_id, u]));
 
       return {
-        result: parentArr.map(p => ({
+        result: parentArr.map((p) => ({
           ...p,
           user: usersMap.get(p.user_id) ?? null,
           children: childArr
-            .filter(c => c.parent_comment_id === p.comment_id)
-            .map(c => ({
+            .filter((c) => c.parent_comment_id === p.comment_id)
+            .map((c) => ({
               ...c,
-              user: usersMap.get(c.user_id) ?? null
-            }))
+              user: usersMap.get(c.user_id) ?? null,
+            })),
         })),
-        total_duration
+        total_duration,
       };
-
     } catch (e) {
-      console.error(e);
+      console.error('Error fetching video comments from ClickHouse:', e);
       throw e;
     }
   }
+
 }

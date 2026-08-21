@@ -141,20 +141,17 @@ export class AppController {
 
   @Get('comments/video/:videoId')
   async findByVideoId(
-    @Param('videoId')
-    videoId: number,
-
-    @Query('childLimit')
-    childLimit: number | null,
-
-    @Query('selectedParentId')
-    selectedParentId: number | null,
-
-    @Query('parentLimit')
-    parentLimit: number | null,
-
+    @Param('videoId') videoId: string,
+    @Query('childLimit') childLimit?: string,
+    @Query('selectedParentId') selectedParentId?: string,
+    @Query('parentLimit') parentLimit?: string,
   ) {
-    return this.queriesService.send('queries.clickhouse.getVideoComments', { videoId: videoId, childLimit: childLimit, selectedParentId: selectedParentId, parentLimit: parentLimit });
+    return this.queriesService.send('queries.clickhouse.getVideoComments', {
+      videoId: Number(videoId),
+      childLimit: childLimit ? Number(childLimit) : 10,
+      selectedParentId: selectedParentId ? Number(selectedParentId) : null,
+      parentLimit: parentLimit ? Number(parentLimit) : 10,
+    });
   }
 
   @Post('comments')
